@@ -1,0 +1,583 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Auraq — Storefront Onboarding Console</title>
+  <meta name="description" content="Configure your boutique details, catalog variants, and knowledge base to deploy your autonomous Telegram storefront agent.">
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    /* Wizard Container & Header */
+    .setup-wrapper {
+      max-width: 860px;
+      margin: 0 auto;
+      padding: 3.5rem 1.5rem 6rem;
+      position: relative;
+      z-index: 10;
+    }
+
+    .setup-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 2.5rem;
+    }
+
+    .setup-brand-link {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      font-family: var(--font-display);
+      font-size: 1.35rem;
+      font-weight: 800;
+      letter-spacing: 0.15em;
+      color: var(--bone);
+      text-decoration: none;
+    }
+
+    .setup-exit-link {
+      font-size: 0.8125rem;
+      color: var(--muted-rose);
+      text-decoration: none;
+      transition: color var(--transition-fast);
+    }
+    .setup-exit-link:hover {
+      color: var(--bone);
+    }
+
+    /* Animated Wizard Progress Bar */
+    .wizard-progress-track {
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 3.5rem;
+      padding: 0 1rem;
+    }
+
+    .wizard-line-bg {
+      position: absolute;
+      top: 50%;
+      left: 10%;
+      right: 10%;
+      height: 2px;
+      background: rgba(244, 234, 230, 0.1);
+      transform: translateY(-50%);
+      z-index: 1;
+    }
+
+    .wizard-line-fill {
+      position: absolute;
+      top: 50%;
+      left: 10%;
+      width: 0%;
+      height: 2px;
+      background: var(--ember);
+      box-shadow: 0 0 10px var(--ember);
+      transform: translateY(-50%);
+      z-index: 2;
+      transition: width 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .wizard-step-node {
+      position: relative;
+      z-index: 3;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.5rem;
+      background: transparent;
+      border: none;
+      cursor: default;
+    }
+
+    .node-circle {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: #18040A;
+      border: 2px solid rgba(244, 234, 230, 0.2);
+      color: var(--muted-rose);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.8125rem;
+      font-weight: 700;
+      transition: all var(--transition-smooth);
+    }
+
+    .wizard-step-node.active .node-circle {
+      background: var(--deep-red);
+      border-color: var(--ember);
+      color: var(--bone);
+      box-shadow: 0 0 16px rgba(255, 77, 61, 0.4);
+    }
+
+    .wizard-step-node.completed .node-circle {
+      background: var(--ember);
+      border-color: var(--ember);
+      color: #0B0306;
+    }
+
+    .node-label {
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--muted-rose);
+    }
+
+    .wizard-step-node.active .node-label {
+      color: var(--bone);
+    }
+
+    /* Wizard Step Cards */
+    .step-card {
+      display: none;
+      opacity: 0;
+      transform: translateY(12px);
+      transition: opacity 0.35s ease, transform 0.35s ease;
+    }
+
+    .step-card.active {
+      display: block;
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .step-intro {
+      margin-bottom: 2rem;
+    }
+
+    .step-intro h1 {
+      font-size: clamp(1.85rem, 3.2vw, 2.5rem);
+      line-height: 1.15;
+      margin-bottom: 0.5rem;
+    }
+
+    .step-intro p {
+      color: var(--muted-rose);
+      font-size: 0.95rem;
+    }
+
+    /* Variant Rows Manager */
+    .variant-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr auto;
+      gap: 0.75rem;
+      align-items: center;
+      margin-bottom: 0.75rem;
+    }
+
+    .btn-remove-row {
+      background: transparent;
+      border: 1px solid var(--glass-border);
+      color: var(--muted-rose);
+      width: 38px;
+      height: 38px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all var(--transition-fast);
+    }
+
+    .btn-remove-row:hover {
+      border-color: var(--ember);
+      color: var(--ember);
+    }
+
+    /* Products & FAQ Existing Items List */
+    .items-stream {
+      display: flex;
+      flex-direction: column;
+      gap: 0.85rem;
+      margin-bottom: 2rem;
+    }
+
+    .item-chip-card {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1rem 1.25rem;
+      background: rgba(22, 4, 10, 0.7);
+      border: 1px solid var(--glass-border);
+      border-radius: 10px;
+    }
+
+    .item-title-col {
+      display: flex;
+      flex-direction: column;
+      gap: 0.2rem;
+    }
+
+    .item-title-col strong {
+      font-size: 0.95rem;
+      color: var(--bone);
+    }
+
+    .item-title-col span {
+      font-size: 0.8rem;
+      color: var(--muted-rose);
+    }
+
+    /* CSV Drop Zone */
+    .csv-drop-zone {
+      border: 2px dashed rgba(244, 234, 230, 0.15);
+      border-radius: 12px;
+      padding: 2rem;
+      text-align: center;
+      background: rgba(18, 3, 8, 0.4);
+      cursor: pointer;
+      transition: border-color var(--transition-fast), background-color var(--transition-fast);
+      margin-top: 1.5rem;
+    }
+
+    .csv-drop-zone:hover, .csv-drop-zone.dragover {
+      border-color: var(--ember);
+      background: rgba(42, 6, 16, 0.5);
+    }
+
+    /* Step Navigation Buttons */
+    .step-actions {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: 2.5rem;
+      padding-top: 1.5rem;
+      border-top: 1px solid var(--glass-border);
+    }
+
+    /* Completion Screen & QR */
+    .completion-panel {
+      text-align: center;
+      padding: 3rem 2rem;
+    }
+
+    .qr-container {
+      display: inline-flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 1.5rem;
+      background: #180309;
+      border: 1px solid var(--glass-border);
+      border-radius: 16px;
+      box-shadow: 0 16px 40px rgba(0, 0, 0, 0.6);
+      margin: 2rem auto;
+    }
+
+    #qr-canvas {
+      width: 200px;
+      height: 200px;
+      border-radius: 8px;
+      background: #0B0306;
+    }
+
+    .share-link-group {
+      display: flex;
+      max-width: 520px;
+      margin: 1.5rem auto 2.5rem;
+      gap: 0.5rem;
+    }
+  </style>
+</head>
+<body>
+  <!-- Grain & Cursor -->
+  <div class="grain-overlay" aria-hidden="true"></div>
+  <div class="cursor-glow" aria-hidden="true"></div>
+
+  <div class="setup-wrapper">
+    <!-- Header -->
+    <header class="setup-header" role="banner">
+      <a href="index.html" class="setup-brand-link auraq-wordmark">A U R A Q</a>
+      <a href="dashboard.html" class="setup-exit-link">Skip to Dashboard &rarr;</a>
+    </header>
+
+    <!-- Animated Wizard Progress Line -->
+    <nav class="wizard-progress-track" aria-label="Setup Steps">
+      <div class="wizard-line-bg"></div>
+      <div class="wizard-line-fill" id="wizard-line-fill"></div>
+
+      <div class="wizard-step-node active" id="node-1">
+        <div class="node-circle">01</div>
+        <span class="node-label">Identity</span>
+      </div>
+
+      <div class="wizard-step-node" id="node-2">
+        <div class="node-circle">02</div>
+        <span class="node-label">Products</span>
+      </div>
+
+      <div class="wizard-step-node" id="node-3">
+        <div class="node-circle">03</div>
+        <span class="node-label">Knowledge</span>
+      </div>
+
+      <div class="wizard-step-node" id="node-4">
+        <div class="node-circle">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="20 6 9 17 4 12"/>
+          </svg>
+        </div>
+        <span class="node-label">Launch</span>
+      </div>
+    </nav>
+
+    <!-- Global Notice Box -->
+    <div id="setup-alert" class="alert-box alert-error" style="display: none;" role="alert"></div>
+
+    <!-- =========================================================================
+         STEP 1: BUSINESS DETAILS
+         ========================================================================= -->
+    <section class="glass-panel step-card active" id="step-1" style="padding: 2.5rem;" aria-labelledby="step-1-title">
+      <header class="step-intro">
+        <h1 class="font-display" id="step-1-title">Store Identity & Coordinates</h1>
+        <p>Give your autonomous sales assistant the voice, hours, and physical studio rules of your label.</p>
+      </header>
+
+      <form id="form-step-1" novalidate>
+        <div class="form-group">
+          <label class="form-label" for="store-desc">Store Narrative & Aesthetic</label>
+          <textarea id="store-desc" rows="3" class="form-textarea" placeholder="e.g. Independent nocturnal garment house crafting heavyweight staples and raw denim in limited numbered runs."></textarea>
+          <span class="form-help">Your assistant uses this to greet nocturnal buyers and explain your brand philosophy.</span>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem;">
+          <div class="form-group">
+            <label class="form-label" for="store-hours">Studio Hours</label>
+            <input type="text" id="store-hours" class="form-input" placeholder="Tuesday – Sunday, 11:00 – 20:00 CET">
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="store-city">Studio City / Location</label>
+            <input type="text" id="store-city" class="form-input" placeholder="Milan, Via Tortona 19">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="owner-contact">Owner Escalation Contact</label>
+          <input type="text" id="owner-contact" class="form-input" placeholder="@ateliernoir_milano or +39 02 8821">
+          <span class="form-help">Where the assistant routes complex requests when a customer demands human review.</span>
+        </div>
+
+        <div class="step-actions">
+          <div></div>
+          <button type="submit" class="btn btn-ember" id="btn-save-step-1">
+            Continue to Products
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M5 12h14"/>
+              <path d="m12 5 7 7-7 7"/>
+            </svg>
+          </button>
+        </div>
+      </form>
+    </section>
+
+    <!-- =========================================================================
+         STEP 2: PRODUCTS & VARIANTS
+         ========================================================================= -->
+    <section class="glass-panel step-card" id="step-2" style="padding: 2.5rem;" aria-labelledby="step-2-title">
+      <header class="step-intro">
+        <h1 class="font-display" id="step-2-title">Catalog, Sizes & Quantities</h1>
+        <p>The agent never sells sold-out pieces. Register items with specific size and colour stocks.</p>
+      </header>
+
+      <!-- Existing Products Stream -->
+      <div style="margin-bottom: 2rem;">
+        <label class="form-label" style="display: block; margin-bottom: 0.75rem;">Active Inventory</label>
+        <div id="products-stream" class="items-stream">
+          <!-- Populated dynamically via JS -->
+        </div>
+      </div>
+
+      <!-- Add New Product Form -->
+      <div class="glass-card" style="padding: 1.75rem; margin-bottom: 2rem;">
+        <h3 class="font-display" style="font-size: 1.15rem; margin-bottom: 1rem;">Add Single Item</h3>
+        <form id="form-add-product" novalidate>
+          <div style="display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 0.75rem; margin-bottom: 1rem;">
+            <div class="form-group" style="margin-bottom: 0;">
+              <label class="form-label" for="prod-name">Item Name</label>
+              <input type="text" id="prod-name" class="form-input" placeholder="e.g. Overdyed Crimson Hoodie" required>
+            </div>
+            <div class="form-group" style="margin-bottom: 0;">
+              <label class="form-label" for="prod-price">Price ($)</label>
+              <input type="number" id="prod-price" class="form-input" placeholder="120" required min="0">
+            </div>
+            <div class="form-group" style="margin-bottom: 0;">
+              <label class="form-label" for="prod-cat">Category</label>
+              <input type="text" id="prod-cat" class="form-input" placeholder="Hoodies" required>
+            </div>
+          </div>
+
+          <label class="form-label" style="display: block; margin-bottom: 0.5rem;">Variants (Size / Colour / Stock Count)</label>
+          <div id="variants-container">
+            <div class="variant-row">
+              <input type="text" class="form-input variant-size" placeholder="Size (e.g. M)" required>
+              <input type="text" class="form-input variant-colour" placeholder="Colour (e.g. Noir)" required>
+              <input type="number" class="form-input variant-stock" placeholder="Stock (e.g. 10)" required min="0">
+              <button type="button" class="btn-remove-row" title="Remove variant" aria-label="Remove variant">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M18 6 6 18"/>
+                  <path d="m6 6 12 12"/>
+                </svg>
+              </button>
+            </div>
+          </div>
+
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 1rem;">
+            <button type="button" class="btn btn-secondary btn-sm" id="btn-add-variant-row">
+              + Add Another Variant
+            </button>
+            <button type="submit" class="btn btn-secondary btn-sm" id="btn-save-product">
+              Save Item to Catalog
+            </button>
+          </div>
+        </form>
+      </div>
+
+      <!-- CSV Bulk Import -->
+      <div class="csv-drop-zone" id="csv-drop-zone" role="button" tabindex="0">
+        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="var(--muted-rose)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="margin-bottom: 0.5rem;" aria-hidden="true">
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+          <polyline points="17 8 12 3 7 8"/>
+          <line x1="12" y1="3" x2="12" y2="15"/>
+        </svg>
+        <p style="font-weight: 600; color: var(--bone); margin-bottom: 0.25rem;">Bulk Import Catalog via CSV</p>
+        <p style="font-size: 0.8125rem; color: var(--muted-rose);">Format: Name, Price, Category, Size, Colour, Stock</p>
+        <input type="file" id="csv-file-input" accept=".csv" style="display: none;">
+      </div>
+
+      <div class="step-actions">
+        <button type="button" class="btn btn-secondary" id="btn-back-to-1">Back</button>
+        <button type="button" class="btn btn-ember" id="btn-next-to-3">
+          Continue to Knowledge & FAQs
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M5 12h14"/>
+            <path d="m12 5 7 7-7 7"/>
+          </svg>
+        </button>
+      </div>
+    </section>
+
+    <!-- =========================================================================
+         STEP 3: KNOWLEDGE & FAQS
+         ========================================================================= -->
+    <section class="glass-panel step-card" id="step-3" style="padding: 2.5rem;" aria-labelledby="step-3-title">
+      <header class="step-intro">
+        <h1 class="font-display" id="step-3-title">Knowledge Base & Studio FAQs</h1>
+        <p>Teach your agent shipping timelines, exchange terms, and bespoke questions.</p>
+      </header>
+
+      <!-- Auto Generate from Raw Text Box -->
+      <div class="glass-card" style="padding: 1.75rem; margin-bottom: 2rem;">
+        <h3 class="font-display" style="font-size: 1.15rem; margin-bottom: 0.5rem;">Auto-Generate from Studio Text</h3>
+        <p style="font-size: 0.85rem; color: var(--muted-rose); margin-bottom: 1rem;">
+          Paste your website copy, return policy, or garment care rules. We’ll synthesize verified Q&amp;A pairs.
+        </p>
+        <textarea id="raw-knowledge-text" rows="3" class="form-textarea" placeholder="Paste return policy, sizing rules, or studio terms here..."></textarea>
+        <div style="margin-top: 0.75rem; text-align: right;">
+          <button type="button" class="btn btn-secondary btn-sm" id="btn-generate-faqs">
+            Extract FAQs
+          </button>
+        </div>
+      </div>
+
+      <!-- FAQ Stream -->
+      <div style="margin-bottom: 2rem;">
+        <label class="form-label" style="display: block; margin-bottom: 0.75rem;">Active Q&amp;A Knowledge</label>
+        <div id="faqs-stream" class="items-stream">
+          <!-- Populated dynamically via JS -->
+        </div>
+      </div>
+
+      <!-- Add Manual FAQ -->
+      <div class="glass-card" style="padding: 1.75rem;">
+        <h3 class="font-display" style="font-size: 1.15rem; margin-bottom: 1rem;">Add Individual FAQ</h3>
+        <form id="form-add-faq" novalidate>
+          <div class="form-group">
+            <label class="form-label" for="faq-question">Question</label>
+            <input type="text" id="faq-question" class="form-input" placeholder="e.g. Do you ship internationally?" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="faq-answer">Answer</label>
+            <textarea id="faq-answer" rows="2" class="form-textarea" placeholder="e.g. Yes, we ship worldwide via DHL Express." required></textarea>
+          </div>
+          <div style="text-align: right;">
+            <button type="submit" class="btn btn-secondary btn-sm" id="btn-save-faq">
+              Save FAQ
+            </button>
+          </div>
+        </form>
+      </div>
+
+      <div class="step-actions">
+        <button type="button" class="btn btn-secondary" id="btn-back-to-2">Back</button>
+        <button type="button" class="btn btn-ember" id="btn-launch-agent">
+          Finalize &amp; Deploy Agent
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M5 12h14"/>
+            <path d="m12 5 7 7-7 7"/>
+          </svg>
+        </button>
+      </div>
+    </section>
+
+    <!-- =========================================================================
+         FINAL SCREEN: DEPLOYMENT & TELEGRAM LAUNCH
+         ========================================================================= -->
+    <section class="glass-panel step-card" id="step-4" aria-labelledby="step-4-title">
+      <div class="completion-panel">
+        <span class="text-ember" style="font-size: 0.8125rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.15em; display: block; margin-bottom: 0.5rem;">
+          Nocturnal Engine Online
+        </span>
+        <h1 class="font-display" id="step-4-title" style="font-size: clamp(2.2rem, 4vw, 3.2rem); margin-bottom: 1rem;">
+          Your storefront agent is awake.
+        </h1>
+        <p class="text-muted" style="max-width: 520px; margin: 0 auto;">
+          Place your direct Telegram link in your Instagram bio. Customers can query inventory and place reservation requests immediately.
+        </p>
+
+        <!-- In-Page Rendered QR Code -->
+        <div class="qr-container">
+          <canvas id="qr-canvas" width="200" height="200" aria-label="QR Code to launch Telegram bot"></canvas>
+          <span style="font-size: 0.75rem; color: var(--muted-rose); margin-top: 0.75rem; letter-spacing: 0.05em;">
+            Scan to test in Telegram
+          </span>
+        </div>
+
+        <!-- Shareable Link Copy -->
+        <div class="share-link-group">
+          <input type="text" id="tg-share-link" class="form-input" readonly value="https://t.me/brand_sales_bot?start=ateliernoir">
+          <button type="button" class="btn btn-secondary" id="btn-copy-link">
+            Copy Link
+          </button>
+        </div>
+
+        <!-- Alert & Actions -->
+        <div style="display: flex; justify-content: center; gap: 1rem; flex-wrap: wrap;">
+          <a href="#" class="btn btn-secondary" id="btn-connect-alerts" target="_blank" rel="noopener">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+              <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+            </svg>
+            Connect Telegram Alerts
+          </a>
+
+          <a href="dashboard.html" class="btn btn-ember">
+            Enter Merchant Dashboard
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M5 12h14"/>
+              <path d="m12 5 7 7-7 7"/>
+            </svg>
+          </a>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <script src="js/config.js"></script>
+  <script src="js/api.js"></script>
+  <script src="js/setup.js"></script>
+</body>
+</html>

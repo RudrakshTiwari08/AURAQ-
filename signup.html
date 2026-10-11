@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Auraq — Register Your Autonomous Sales Agent</title>
+  <meta name="description" content="Empower your boutique with a Telegram sales agent that answers product queries and collects order requests around the clock.">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <!-- Noise & Glow Effects -->
+  <div class="grain-overlay" aria-hidden="true"></div>
+  <div class="cursor-glow" aria-hidden="true"></div>
+
+  <div class="auth-split-wrapper">
+    <!-- Cinematic Visual Panel -->
+    <section class="auth-hero-panel" aria-label="Brand Philosophy">
+      <div class="auth-hero-glow" aria-hidden="true"></div>
+      
+      <a href="index.html" class="auth-hero-logo auraq-wordmark">A U R A Q</a>
+
+      <div class="auth-hero-quote">
+        <p>“At 2:47 a.m. when your studio is quiet, curiosity never rests. Your storefront shouldn't either.”</p>
+        <cite>Midnight commerce · Autonomous presence</cite>
+      </div>
+
+      <div class="auth-hero-footer">
+        <span>© Auraq Inc. Private nocturnal retail infrastructure.</span>
+      </div>
+    </section>
+
+    <!-- Form Panel -->
+    <main class="auth-form-panel">
+      <div class="glass-panel auth-card">
+        <h1 class="auth-title">Awaken your shop</h1>
+        <p class="auth-subtitle">Create an account to configure products, sync sizes, and deploy your direct Telegram sales link.</p>
+
+        <div id="auth-error" class="alert-box alert-error" style="display: none;" role="alert"></div>
+
+        <form id="signup-form" novalidate>
+          <div class="form-group">
+            <label class="form-label" for="name">Owner Full Name</label>
+            <input type="text" id="name" name="name" class="form-input" placeholder="e.g. Vivienne Westwood" required autocomplete="name">
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="email">Business Email</label>
+            <input type="email" id="email" name="email" class="form-input" placeholder="vivienne@atelier.com" required autocomplete="email">
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="password">Password</label>
+            <input type="password" id="password" name="password" class="form-input" placeholder="••••••••••••" required autocomplete="new-password">
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="business-name">Business / Label Name</label>
+            <input type="text" id="business-name" name="business_name" class="form-input" placeholder="e.g. Atelier Noir" required>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="business-type">Store Category</label>
+            <select id="business-type" name="business_type" class="form-input form-select" required>
+              <option value="Clothing" selected>Clothing & Fashion</option>
+              <option value="Salon">Salon & Wellness</option>
+              <option value="Cafe">Specialty Cafe & Roastery</option>
+              <option value="Electronics">Electronics & Hardware</option>
+              <option value="Other">Other Independent Goods</option>
+            </select>
+          </div>
+
+          <button type="submit" id="signup-submit" class="btn btn-ember" style="width: 100%; margin-top: 1rem;">
+            Claim your link & begin setup
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M5 12h14"/>
+              <path d="m12 5 7 7-7 7"/>
+            </svg>
+          </button>
+        </form>
+
+        <div class="auth-footer-nav">
+          <span>Already operating a bot?</span>
+          <a href="login.html">Log in here</a>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script src="js/config.js"></script>
+  <script src="js/api.js"></script>
+  <script src="js/auth.js"></script>
+</body>
+</html>

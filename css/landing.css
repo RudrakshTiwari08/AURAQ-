@@ -1,0 +1,972 @@
+/* ==========================================================================
+   BRAND — Landing Page Stylesheet (css/landing.css)
+   "Midnight, red, and a shop that never closes"
+   ========================================================================== */
+
+/* Header / Navigation */
+.landing-nav {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 72px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 3.5rem;
+  z-index: 100;
+  background: rgba(11, 3, 6, 0.65);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--glass-border);
+  transition: background var(--transition-smooth), border-color var(--transition-smooth);
+}
+
+.landing-nav.scrolled {
+  background: rgba(11, 3, 6, 0.88);
+  border-bottom-color: rgba(244, 234, 230, 0.16);
+}
+
+.nav-brand {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  font-family: var(--font-display);
+  font-size: 1.45rem;
+  font-weight: 800;
+  letter-spacing: 0.15em;
+  color: var(--bone);
+  text-decoration: none;
+}
+
+.nav-links {
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+  list-style: none;
+}
+
+.nav-link {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--muted-rose);
+  text-decoration: none;
+  transition: color var(--transition-fast);
+  letter-spacing: 0.02em;
+}
+
+.nav-link:hover {
+  color: var(--bone);
+}
+
+.nav-actions {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+.nav-login {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--bone);
+  text-decoration: none;
+  transition: color var(--transition-fast);
+}
+
+.nav-login:hover {
+  color: var(--ember);
+}
+
+/* ==========================================================================
+   SCENE 1: HERO
+   ========================================================================== */
+.hero-section {
+  position: relative;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 8rem 2rem 5rem;
+  overflow: hidden;
+  text-align: center;
+}
+
+/* Hero Parallax Depth Layers */
+.hero-depth-layer {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  will-change: transform;
+}
+
+.hero-orb-1 {
+  position: absolute;
+  top: 15%;
+  left: 50%;
+  width: 720px;
+  height: 720px;
+  margin-left: -360px;
+  background: radial-gradient(circle, rgba(193, 18, 31, 0.32) 0%, rgba(122, 15, 31, 0.14) 45%, transparent 75%);
+  filter: blur(70px);
+  border-radius: 50%;
+}
+
+.hero-orb-2 {
+  position: absolute;
+  top: 35%;
+  left: 20%;
+  width: 450px;
+  height: 450px;
+  background: radial-gradient(circle, rgba(255, 77, 61, 0.22) 0%, rgba(42, 6, 10, 0.1) 60%, transparent 80%);
+  filter: blur(80px);
+  border-radius: 50%;
+}
+
+.hero-grid {
+  position: absolute;
+  inset: 0;
+  background-image: 
+    linear-gradient(to right, rgba(244, 234, 230, 0.035) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(244, 234, 230, 0.035) 1px, transparent 1px);
+  background-size: 80px 80px;
+  opacity: 0.8;
+  mask-image: radial-gradient(circle at center, black 40%, transparent 85%);
+  -webkit-mask-image: radial-gradient(circle at center, black 40%, transparent 85%);
+}
+
+/* Floating Glass Chat Bubbles */
+.hero-bubble {
+  position: absolute;
+  padding: 0.85rem 1.25rem;
+  border-radius: 14px;
+  font-size: 0.85rem;
+  color: var(--bone);
+  text-align: left;
+  max-width: 280px;
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.6);
+  pointer-events: none;
+}
+
+.hero-bubble-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 0.35rem;
+  font-size: 0.725rem;
+  color: var(--muted-rose);
+}
+
+.hero-bubble-1 {
+  top: 22%;
+  left: 8%;
+}
+
+.hero-bubble-2 {
+  bottom: 22%;
+  left: 12%;
+}
+
+.hero-bubble-3 {
+  top: 26%;
+  right: 8%;
+}
+
+.hero-bubble-4 {
+  bottom: 25%;
+  right: 12%;
+}
+
+/* Hero Content */
+.hero-content {
+  position: relative;
+  z-index: 10;
+  max-width: 1040px;
+  margin: 0 auto;
+}
+
+.hero-title-container {
+  overflow: visible;
+  margin-bottom: 2rem;
+}
+
+.hero-headline-line1,
+.hero-headline-line2 {
+  display: block;
+  font-family: var(--font-display);
+  font-size: clamp(3.2rem, 8.5vw, 8.5rem);
+  line-height: 0.95;
+  letter-spacing: -0.035em;
+  font-weight: 800;
+  will-change: transform;
+}
+
+.hero-headline-line1 {
+  color: var(--bone);
+}
+
+.hero-headline-line2 {
+  color: var(--bone);
+  font-style: italic;
+  font-weight: 300;
+  margin-top: 0.2rem;
+}
+
+.hero-subtitle {
+  font-size: clamp(1.05rem, 1.8vw, 1.35rem);
+  color: var(--muted-rose);
+  max-width: 660px;
+  margin: 0 auto 2.5rem;
+  line-height: 1.55;
+}
+
+.hero-ctas {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1.5rem;
+}
+
+.hero-scroll-indicator {
+  position: absolute;
+  bottom: 2rem;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.75rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--muted-rose);
+  opacity: 0.7;
+}
+
+.scroll-indicator-line {
+  width: 1px;
+  height: 32px;
+  background: linear-gradient(to bottom, var(--muted-rose), transparent);
+  animation: scroll-pulse 2s cubic-bezier(0.65, 0, 0.35, 1) infinite;
+}
+
+@keyframes scroll-pulse {
+  0% { transform: scaleY(0); transform-origin: top; }
+  50% { transform: scaleY(1); transform-origin: top; }
+  50.1% { transform: scaleY(1); transform-origin: bottom; }
+  100% { transform: scaleY(0); transform-origin: bottom; }
+}
+
+/* ==========================================================================
+   SCENE 2: THE PROBLEM (Pinned Story)
+   ========================================================================== */
+.problem-pin-wrapper {
+  position: relative;
+  width: 100%;
+  height: 300vh;
+  background: var(--oxblood);
+}
+
+.problem-scene-sticky {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  padding: 2rem;
+}
+
+.problem-grid-layout {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  max-width: 1180px;
+  width: 100%;
+  gap: 4rem;
+  align-items: center;
+  position: relative;
+  z-index: 5;
+}
+
+.problem-narrative {
+  max-width: 520px;
+}
+
+.problem-time-tag {
+  font-size: 0.8125rem;
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--ember);
+  margin-bottom: 1rem;
+  display: block;
+}
+
+.problem-headline {
+  font-size: clamp(2.2rem, 4vw, 3.8rem);
+  line-height: 1.05;
+  margin-bottom: 1.5rem;
+}
+
+.problem-description {
+  font-size: 1.0625rem;
+  color: var(--muted-rose);
+  line-height: 1.6;
+}
+
+.problem-chat-stage {
+  position: relative;
+  min-height: 480px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 1.25rem;
+}
+
+.problem-bubble {
+  position: relative;
+  padding: 1.15rem 1.45rem;
+  border-radius: 16px;
+  max-width: 420px;
+  font-size: 0.9375rem;
+  transition: transform var(--transition-smooth), opacity var(--transition-smooth), border-color var(--transition-smooth), background-color var(--transition-smooth);
+}
+
+.problem-bubble.customer {
+  align-self: flex-start;
+  background: rgba(35, 7, 15, 0.7);
+  border: 1px solid var(--glass-border);
+  color: var(--bone);
+}
+
+.problem-bubble.customer.unanswered {
+  opacity: 0.45;
+  filter: grayscale(1);
+  transform: translateX(-10px);
+}
+
+.problem-bubble.assistant {
+  align-self: flex-end;
+  background: rgba(122, 15, 31, 0.45);
+  border: 1px solid rgba(255, 77, 61, 0.4);
+  color: var(--bone);
+  box-shadow: 0 12px 30px rgba(193, 18, 31, 0.25);
+  opacity: 0;
+  transform: translateY(20px);
+}
+
+.problem-bubble.assistant.active {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.problem-bubble-sender {
+  font-size: 0.725rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 0.35rem;
+  display: flex;
+  justify-content: space-between;
+}
+
+.problem-bubble-sender .sender-name {
+  color: var(--champagne);
+}
+
+.problem-bubble-sender .time-stamp {
+  color: var(--muted-rose);
+}
+
+/* ==========================================================================
+   SCENE 3: HOW IT WORKS (CSS Phone Mockup)
+   ========================================================================== */
+.how-it-works-wrapper {
+  position: relative;
+  width: 100%;
+  height: 320vh;
+  background: radial-gradient(circle at 70% 50%, #1f040d 0%, #0B0306 70%);
+}
+
+.how-sticky-frame {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  padding: 2rem 4rem;
+}
+
+.how-container {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  max-width: 1200px;
+  width: 100%;
+  gap: 5rem;
+  align-items: center;
+}
+
+.how-steps-column {
+  position: relative;
+  min-height: 380px;
+}
+
+.how-step-card {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  opacity: 0;
+  transform: translateY(24px);
+  pointer-events: none;
+  transition: opacity 0.4s ease, transform 0.4s ease;
+}
+
+.how-step-card.active {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+
+.how-step-number {
+  font-family: var(--font-display);
+  font-size: 1.15rem;
+  color: var(--ember);
+  margin-bottom: 0.75rem;
+  display: block;
+  font-weight: 700;
+}
+
+.how-step-title {
+  font-size: clamp(2rem, 3.2vw, 3rem);
+  line-height: 1.1;
+  margin-bottom: 1.25rem;
+}
+
+.how-step-text {
+  font-size: 1.05rem;
+  color: var(--muted-rose);
+  line-height: 1.6;
+  max-width: 440px;
+}
+
+/* Pure CSS Phone Mockup */
+.phone-mockup-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.phone-mockup {
+  position: relative;
+  width: 340px;
+  height: 660px;
+  background: #080204;
+  border-radius: 46px;
+  border: 4px solid rgba(244, 234, 230, 0.18);
+  box-shadow: 
+    0 0 0 8px #130308,
+    0 24px 60px rgba(0, 0, 0, 0.85),
+    inset 0 0 12px rgba(255, 77, 61, 0.1);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Notch / Dynamic Island */
+.phone-island {
+  position: absolute;
+  top: 14px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 110px;
+  height: 24px;
+  background: #000000;
+  border-radius: 18px;
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 10px;
+}
+
+.phone-camera {
+  width: 8px;
+  height: 8px;
+  background: #111;
+  border-radius: 50%;
+  border: 1px solid #222;
+}
+
+.phone-speaker {
+  width: 32px;
+  height: 4px;
+  background: #181818;
+  border-radius: 2px;
+}
+
+/* Phone Screen (Telegram Mockup) */
+.phone-screen {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  background: #0d0307;
+  padding-top: 48px;
+}
+
+.phone-tg-header {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  background: rgba(30, 5, 12, 0.9);
+  border-bottom: 1px solid var(--glass-border);
+}
+
+.tg-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--deep-red);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 0.8rem;
+  color: var(--bone);
+}
+
+.tg-bot-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.tg-bot-name {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--bone);
+  line-height: 1.2;
+}
+
+.tg-bot-status {
+  font-size: 0.7rem;
+  color: var(--ember);
+}
+
+/* Telegram Chat Feed Inside Phone */
+.phone-chat-feed {
+  flex: 1;
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+  overflow-y: auto;
+  scrollbar-width: none;
+}
+
+.phone-chat-feed::-webkit-scrollbar {
+  display: none;
+}
+
+.tg-msg {
+  max-width: 82%;
+  padding: 0.65rem 0.85rem;
+  border-radius: 12px;
+  font-size: 0.8rem;
+  line-height: 1.35;
+  position: relative;
+  opacity: 0;
+  transform: translateY(10px);
+  transition: opacity 0.35s ease, transform 0.35s ease;
+}
+
+.tg-msg.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.tg-msg.incoming {
+  align-self: flex-start;
+  background: rgba(45, 8, 18, 0.8);
+  border: 1px solid var(--glass-border);
+  color: var(--bone);
+}
+
+.tg-msg.outgoing {
+  align-self: flex-end;
+  background: var(--deep-red);
+  color: var(--bone);
+  border-bottom-right-radius: 4px;
+}
+
+.tg-msg-status-pill {
+  display: inline-block;
+  margin-top: 0.35rem;
+  padding: 0.2rem 0.5rem;
+  background: rgba(11, 3, 6, 0.75);
+  border-radius: 4px;
+  font-size: 0.675rem;
+  color: var(--champagne);
+  letter-spacing: 0.03em;
+}
+
+/* ==========================================================================
+   SCENE 4: THE OWNER'S VIEW
+   ========================================================================== */
+.owner-view-section {
+  position: relative;
+  padding: 10rem 2rem 8rem;
+  background: radial-gradient(circle at 50% 20%, #290610 0%, #0B0306 65%);
+  overflow: hidden;
+  text-align: center;
+}
+
+.owner-view-container {
+  max-width: 1140px;
+  margin: 0 auto;
+}
+
+.owner-view-header {
+  margin-bottom: 3.5rem;
+}
+
+.owner-view-tag {
+  font-size: 0.8125rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  color: var(--ember);
+  margin-bottom: 0.85rem;
+  display: block;
+}
+
+.owner-view-title {
+  font-size: clamp(2.4rem, 4.5vw, 4.2rem);
+  line-height: 1.1;
+  margin-bottom: 1.25rem;
+}
+
+.owner-view-desc {
+  font-size: 1.05rem;
+  color: var(--muted-rose);
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+/* Tilted Glass Dashboard Stage */
+.dashboard-preview-stage {
+  perspective: 1200px;
+  margin: 3rem auto 4.5rem;
+  max-width: 980px;
+}
+
+.dashboard-tilted-glass {
+  background: rgba(28, 5, 12, 0.75);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid var(--glass-border-strong);
+  border-radius: 20px;
+  box-shadow: 0 32px 80px rgba(0, 0, 0, 0.85), inset 0 1px 0 rgba(244, 234, 230, 0.2);
+  padding: 2.25rem;
+  transform-style: preserve-3d;
+  will-change: transform, opacity;
+  text-align: left;
+}
+
+.dash-preview-topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-bottom: 1.5rem;
+  margin-bottom: 2rem;
+  border-bottom: 1px solid var(--glass-border);
+}
+
+.dash-store-title {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.dash-status-dot {
+  width: 8px;
+  height: 8px;
+  background: var(--ember);
+  border-radius: 50%;
+  box-shadow: 0 0 10px var(--ember);
+}
+
+/* Counter Stat Cards Grid */
+.owner-counters-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1.5rem;
+  margin-bottom: 2.5rem;
+}
+
+.counter-card {
+  padding: 1.5rem 1.25rem;
+  background: rgba(18, 3, 8, 0.65);
+  border-radius: 12px;
+  border: 1px solid var(--glass-border);
+  text-align: left;
+}
+
+.counter-label {
+  font-size: 0.8125rem;
+  color: var(--muted-rose);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 0.6rem;
+  display: block;
+}
+
+.counter-value {
+  font-family: var(--font-display);
+  font-size: clamp(2rem, 3.5vw, 2.75rem);
+  font-weight: 800;
+  color: var(--bone);
+  line-height: 1;
+}
+
+/* Pending order preview inside tilt */
+.dash-pending-order-box {
+  background: rgba(42, 6, 16, 0.5);
+  border: 1px solid var(--glass-border);
+  border-radius: 12px;
+  padding: 1.25rem 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.order-info-group {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.order-info-text {
+  display: flex;
+  flex-direction: column;
+}
+
+.order-name {
+  font-weight: 700;
+  color: var(--bone);
+}
+
+.order-details {
+  font-size: 0.8125rem;
+  color: var(--muted-rose);
+}
+
+.order-action-buttons {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+/* ==========================================================================
+   SCENE 5: BUILT FOR SMALL SHOPS (Horizontal Track)
+   ========================================================================== */
+.small-shops-wrapper {
+  position: relative;
+  width: 100%;
+  height: 350vh;
+  background: var(--oxblood);
+}
+
+.small-shops-sticky {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  overflow: hidden;
+  padding: 0 4rem;
+}
+
+.small-shops-header {
+  max-width: 1200px;
+  margin: 0 auto 3rem;
+  width: 100%;
+}
+
+.small-shops-track {
+  display: flex;
+  gap: 2rem;
+  width: max-content;
+  will-change: transform;
+}
+
+.shop-feature-card {
+  width: 420px;
+  min-height: 320px;
+  padding: 3rem 2.5rem;
+  background: rgba(35, 6, 15, 0.6);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid var(--glass-border);
+  border-radius: 16px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  box-shadow: var(--glass-highlight);
+}
+
+.feature-index {
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+  color: var(--champagne);
+  font-style: italic;
+}
+
+.feature-card-content h3 {
+  font-size: 1.75rem;
+  line-height: 1.2;
+  margin-bottom: 1rem;
+}
+
+.feature-card-content p {
+  color: var(--muted-rose);
+  font-size: 0.95rem;
+  line-height: 1.6;
+}
+
+/* ==========================================================================
+   SCENE 6: FINAL CTA & FOOTER
+   ========================================================================== */
+.final-cta-section {
+  position: relative;
+  padding: 12rem 2rem 5rem;
+  text-align: center;
+  background: radial-gradient(circle at 50% 80%, #3d0817 0%, #0B0306 70%);
+  overflow: hidden;
+}
+
+.final-cta-container {
+  max-width: 900px;
+  margin: 0 auto;
+  position: relative;
+  z-index: 5;
+}
+
+.final-cta-title {
+  font-size: clamp(3rem, 7vw, 6.5rem);
+  line-height: 0.98;
+  letter-spacing: -0.03em;
+  margin-bottom: 2rem;
+}
+
+.final-cta-subtext {
+  font-size: 1.15rem;
+  color: var(--muted-rose);
+  margin-bottom: 3rem;
+}
+
+.cta-button-wrapper {
+  margin-bottom: 1.5rem;
+}
+
+.cta-security-note {
+  font-size: 0.8125rem;
+  color: var(--muted-rose);
+  opacity: 0.8;
+}
+
+.landing-footer {
+  margin-top: 10rem;
+  padding-top: 3rem;
+  border-top: 1px solid var(--glass-border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 0.8125rem;
+  color: var(--muted-rose);
+}
+
+.footer-nav {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+.footer-nav a {
+  color: var(--muted-rose);
+  text-decoration: none;
+  transition: color var(--transition-fast);
+}
+
+.footer-nav a:hover {
+  color: var(--bone);
+}
+
+/* ==========================================================================
+   MOBILE & RESPONSIVE RULES (< 768px)
+   ========================================================================== */
+@media (max-width: 960px) {
+  .landing-nav {
+    padding: 0 1.5rem;
+  }
+  .nav-links {
+    display: none;
+  }
+  .problem-grid-layout,
+  .how-container {
+    grid-template-columns: 1fr;
+    gap: 3rem;
+  }
+  .owner-counters-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+  .landing-footer {
+    flex-direction: column;
+    gap: 1.5rem;
+    text-align: center;
+  }
+}
+
+@media (max-width: 768px) {
+  /* Under 768px: Simplify pinned scenes to clean scrolling blocks */
+  .problem-pin-wrapper,
+  .how-it-works-wrapper,
+  .small-shops-wrapper {
+    height: auto !important;
+  }
+  .problem-scene-sticky,
+  .how-sticky-frame,
+  .small-shops-sticky {
+    position: relative !important;
+    height: auto !important;
+    padding: 5rem 1.5rem !important;
+  }
+  .small-shops-track {
+    flex-direction: column !important;
+    width: 100% !important;
+    transform: none !important;
+  }
+  .shop-feature-card {
+    width: 100% !important;
+  }
+  .how-steps-column {
+    min-height: auto;
+  }
+  .how-step-card {
+    position: relative !important;
+    opacity: 1 !important;
+    transform: none !important;
+    margin-bottom: 2.5rem;
+  }
+  .phone-mockup {
+    width: 300px;
+    height: 580px;
+  }
+  .hero-bubble {
+    display: none;
+  }
+}

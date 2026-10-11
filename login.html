@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Auraq — Storefront Console Access</title>
+  <meta name="description" content="Sign in to your Auraq dashboard to review buyer inquiries, verify pending reservations, and inspect midnight conversations.">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <!-- Noise & Glow Effects -->
+  <div class="grain-overlay" aria-hidden="true"></div>
+  <div class="cursor-glow" aria-hidden="true"></div>
+
+  <div class="auth-split-wrapper">
+    <!-- Cinematic Visual Panel -->
+    <section class="auth-hero-panel" aria-label="Brand Philosophy">
+      <div class="auth-hero-glow" aria-hidden="true"></div>
+      
+      <a href="index.html" class="auth-hero-logo auraq-wordmark">A U R A Q</a>
+
+      <div class="auth-hero-quote">
+        <p>“Quiet confidence. While you rest, genuine purchase intent is captured and organized for your signature.”</p>
+        <cite>Owner Command · Zero Hallucinations</cite>
+      </div>
+
+      <div class="auth-hero-footer">
+        <span>Owner authorization protected. 256-bit session encryption.</span>
+      </div>
+    </section>
+
+    <!-- Form Panel -->
+    <main class="auth-form-panel">
+      <div class="glass-panel auth-card">
+        <h1 class="auth-title">Welcome back</h1>
+        <p class="auth-subtitle">Log in to oversee incoming buyer inquiries and confirm orders.</p>
+
+        <div id="auth-error" class="alert-box alert-error" style="display: none;" role="alert"></div>
+
+        <form id="login-form" novalidate>
+          <div class="form-group">
+            <label class="form-label" for="email">Business Email</label>
+            <input type="email" id="email" name="email" class="form-input" placeholder="vivienne@atelier.com" required autocomplete="email">
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="password">Password</label>
+            <input type="password" id="password" name="password" class="form-input" placeholder="••••••••••••" required autocomplete="current-password">
+          </div>
+
+          <button type="submit" id="login-submit" class="btn btn-ember" style="width: 100%; margin-top: 1rem;">
+            Enter Merchant Dashboard
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M5 12h14"/>
+              <path d="m12 5 7 7-7 7"/>
+            </svg>
+          </button>
+        </form>
+
+        <div class="auth-footer-nav">
+          <span>Don't have an agent set up?</span>
+          <a href="signup.html">Create one here</a>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script src="js/config.js"></script>
+  <script src="js/api.js"></script>
+  <script src="js/auth.js"></script>
+</body>
+</html>

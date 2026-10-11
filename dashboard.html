@@ -1,0 +1,914 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Auraq — Merchant Command Console</title>
+  <meta name="description" content="Oversee autonomous customer conversations, inspect real-time purchase intent, and confirm pending reservations.">
+  <link rel="stylesheet" href="css/style.css">
+
+  <!-- Chart.js from cdnjs -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+
+  <style>
+    /* Dashboard Layout */
+    .dash-layout {
+      display: grid;
+      grid-template-columns: 260px 1fr;
+      min-height: 100vh;
+      position: relative;
+    }
+
+    /* Sidebar Navigation */
+    .dash-sidebar {
+      background: rgba(18, 3, 8, 0.95);
+      border-right: 1px solid var(--glass-border);
+      padding: 2rem 1.5rem;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      z-index: 100;
+    }
+
+    .dash-logo-badge {
+      display: flex;
+      align-items: center;
+      gap: 0.65rem;
+      font-family: var(--font-display);
+      font-size: 1.35rem;
+      font-weight: 800;
+      letter-spacing: 0.15em;
+      color: var(--bone);
+      text-decoration: none;
+      margin-bottom: 2.5rem;
+    }
+
+    .dash-bot-status {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      font-size: 0.7rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--ember);
+      margin-top: 0.25rem;
+    }
+
+    .dash-bot-dot {
+      width: 6px;
+      height: 6px;
+      background: var(--ember);
+      border-radius: 50%;
+      box-shadow: 0 0 8px var(--ember);
+    }
+
+    .dash-nav-menu {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 0.35rem;
+      flex: 1;
+    }
+
+    .dash-nav-btn {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.75rem 1rem;
+      border-radius: 8px;
+      border: 1px solid transparent;
+      background: transparent;
+      color: var(--muted-rose);
+      font-family: var(--font-body);
+      font-size: 0.875rem;
+      font-weight: 600;
+      cursor: pointer;
+      text-align: left;
+      transition: all var(--transition-fast);
+    }
+
+    .dash-nav-btn:hover {
+      background: rgba(42, 6, 16, 0.4);
+      color: var(--bone);
+    }
+
+    .dash-nav-btn.active {
+      background: rgba(122, 15, 31, 0.35);
+      border-color: rgba(255, 77, 61, 0.3);
+      color: var(--bone);
+      box-shadow: var(--glass-highlight);
+    }
+
+    .dash-nav-item-left {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .dash-badge {
+      font-size: 0.7rem;
+      font-weight: 700;
+      padding: 0.15rem 0.45rem;
+      border-radius: 4px;
+      background: var(--deep-red);
+      color: var(--bone);
+    }
+
+    .dash-sidebar-footer {
+      padding-top: 1.5rem;
+      border-top: 1px solid var(--glass-border);
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+
+    .dash-store-label {
+      font-size: 0.8rem;
+      color: var(--muted-rose);
+    }
+
+    .dash-store-label strong {
+      display: block;
+      color: var(--bone);
+      font-size: 0.9rem;
+    }
+
+    /* Main Content Area */
+    .dash-main {
+      padding: 3rem 3.5rem 5rem;
+      max-width: 1300px;
+      width: 100%;
+    }
+
+    .dash-header-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 2.5rem;
+    }
+
+    .dash-header-title {
+      font-size: 2rem;
+      line-height: 1.1;
+    }
+
+    .dash-header-subtitle {
+      font-size: 0.875rem;
+      color: var(--muted-rose);
+      margin-top: 0.25rem;
+    }
+
+    /* Sections Container */
+    .dash-section {
+      display: none;
+      animation: fadeIn 0.25s ease-out;
+    }
+
+    .dash-section.active {
+      display: block;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Overview Section */
+    .stat-cards-row {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1.25rem;
+      margin-bottom: 2rem;
+    }
+
+    .stat-card-box {
+      padding: 1.5rem;
+      border-radius: 12px;
+      background: rgba(30, 5, 12, 0.6);
+      backdrop-filter: blur(16px);
+      border: 1px solid var(--glass-border);
+      box-shadow: var(--glass-highlight);
+    }
+
+    .stat-label-text {
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--muted-rose);
+      margin-bottom: 0.5rem;
+      display: block;
+    }
+
+    .stat-num-value {
+      font-family: var(--font-display);
+      font-size: 2.25rem;
+      font-weight: 800;
+      color: var(--bone);
+      line-height: 1;
+    }
+
+    /* Funnel Visual */
+    .funnel-container {
+      background: rgba(24, 4, 10, 0.65);
+      border: 1px solid var(--glass-border);
+      border-radius: 14px;
+      padding: 1.75rem;
+      margin-bottom: 2rem;
+    }
+
+    .funnel-stages-row {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1rem;
+      margin-top: 1.25rem;
+    }
+
+    .funnel-stage-col {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .funnel-bar-track {
+      height: 8px;
+      background: rgba(244, 234, 230, 0.08);
+      border-radius: 4px;
+      overflow: hidden;
+    }
+
+    .funnel-bar-fill {
+      height: 100%;
+      background: var(--deep-red);
+      border-radius: 4px;
+      transition: width 0.6s ease;
+    }
+
+    .funnel-bar-fill.active {
+      background: var(--ember);
+      box-shadow: 0 0 8px var(--ember);
+    }
+
+    /* Grid for Chart & Top Products */
+    .overview-split-grid {
+      display: grid;
+      grid-template-columns: 2fr 1fr;
+      gap: 1.5rem;
+    }
+
+    .chart-panel-box, .top-prods-panel {
+      padding: 1.75rem;
+      background: rgba(24, 4, 10, 0.65);
+      border: 1px solid var(--glass-border);
+      border-radius: 14px;
+    }
+
+    /* Orders Table */
+    .orders-table-wrapper {
+      background: rgba(24, 4, 10, 0.65);
+      border: 1px solid var(--glass-border);
+      border-radius: 14px;
+      overflow-x: auto;
+    }
+
+    .data-table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+      font-size: 0.875rem;
+    }
+
+    .data-table th {
+      padding: 1rem 1.25rem;
+      background: rgba(14, 2, 6, 0.75);
+      color: var(--muted-rose);
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      border-bottom: 1px solid var(--glass-border);
+    }
+
+    .data-table td {
+      padding: 1.15rem 1.25rem;
+      border-bottom: 1px solid rgba(244, 234, 230, 0.06);
+      color: var(--bone);
+      vertical-align: middle;
+    }
+
+    .data-table tr:hover td {
+      background: rgba(42, 6, 16, 0.25);
+    }
+
+    .status-chip {
+      display: inline-block;
+      padding: 0.25rem 0.6rem;
+      border-radius: 4px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      letter-spacing: 0.03em;
+      text-transform: uppercase;
+    }
+
+    .status-pending {
+      background: rgba(217, 183, 126, 0.15);
+      color: var(--champagne);
+      border: 1px solid rgba(217, 183, 126, 0.35);
+    }
+
+    .status-confirmed {
+      background: rgba(255, 77, 61, 0.15);
+      color: var(--ember);
+      border: 1px solid rgba(255, 77, 61, 0.4);
+    }
+
+    .status-rejected {
+      background: rgba(184, 154, 154, 0.1);
+      color: var(--muted-rose);
+      border: 1px solid rgba(184, 154, 154, 0.2);
+    }
+
+    /* Conversations Layout */
+    .convos-split-view {
+      display: grid;
+      grid-template-columns: 320px 1fr;
+      gap: 1.5rem;
+      min-height: 580px;
+    }
+
+    .convos-thread-list {
+      background: rgba(24, 4, 10, 0.65);
+      border: 1px solid var(--glass-border);
+      border-radius: 14px;
+      padding: 0.75rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      max-height: 600px;
+      overflow-y: auto;
+    }
+
+    .thread-item {
+      padding: 0.85rem 1rem;
+      border-radius: 8px;
+      background: transparent;
+      border: 1px solid transparent;
+      cursor: pointer;
+      text-align: left;
+      transition: all var(--transition-fast);
+    }
+
+    .thread-item:hover {
+      background: rgba(42, 6, 16, 0.4);
+    }
+
+    .thread-item.active {
+      background: rgba(122, 15, 31, 0.35);
+      border-color: rgba(255, 77, 61, 0.25);
+    }
+
+    .thread-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 0.3rem;
+    }
+
+    .thread-name {
+      font-weight: 700;
+      color: var(--bone);
+      font-size: 0.85rem;
+    }
+
+    .thread-time {
+      font-size: 0.725rem;
+      color: var(--muted-rose);
+    }
+
+    .thread-preview {
+      font-size: 0.775rem;
+      color: var(--muted-rose);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .convos-chat-window {
+      background: rgba(24, 4, 10, 0.65);
+      border: 1px solid var(--glass-border);
+      border-radius: 14px;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .chat-window-header {
+      padding: 1rem 1.5rem;
+      border-bottom: 1px solid var(--glass-border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: rgba(14, 2, 6, 0.75);
+    }
+
+    .chat-messages-container {
+      flex: 1;
+      padding: 1.5rem;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      max-height: 520px;
+    }
+
+    .chat-bubble {
+      max-width: 75%;
+      padding: 0.85rem 1.15rem;
+      border-radius: 14px;
+      font-size: 0.875rem;
+      line-height: 1.4;
+    }
+
+    .chat-bubble.customer {
+      align-self: flex-start;
+      background: rgba(42, 6, 16, 0.7);
+      border: 1px solid var(--glass-border);
+      color: var(--bone);
+    }
+
+    .chat-bubble.assistant {
+      align-self: flex-end;
+      background: var(--deep-red);
+      color: var(--bone);
+      box-shadow: 0 4px 16px rgba(122, 15, 31, 0.3);
+    }
+
+    .chat-meta {
+      font-size: 0.7rem;
+      margin-top: 0.3rem;
+      opacity: 0.75;
+      text-align: right;
+    }
+
+    /* Test Chat Terminal */
+    .test-chat-box {
+      background: rgba(24, 4, 10, 0.75);
+      border: 1px solid var(--glass-border);
+      border-radius: 14px;
+      display: flex;
+      flex-direction: column;
+      height: 580px;
+      overflow: hidden;
+      max-width: 800px;
+    }
+
+    .test-chat-feed {
+      flex: 1;
+      padding: 1.5rem;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .test-chat-input-bar {
+      padding: 1rem 1.5rem;
+      border-top: 1px solid var(--glass-border);
+      display: flex;
+      gap: 0.75rem;
+      background: rgba(14, 2, 6, 0.8);
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 960px) {
+      .stat-cards-row {
+        grid-template-columns: repeat(2, 1fr);
+      }
+      .overview-split-grid {
+        grid-template-columns: 1fr;
+      }
+      .convos-split-view {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 860px) {
+      .dash-layout {
+        grid-template-columns: 1fr;
+        padding-bottom: 70px;
+      }
+      .dash-sidebar {
+        position: fixed;
+        bottom: 0;
+        top: auto;
+        left: 0;
+        width: 100%;
+        height: 64px;
+        flex-direction: row;
+        align-items: center;
+        padding: 0 1rem;
+        background: rgba(14, 2, 6, 0.95);
+        backdrop-filter: blur(20px);
+        border-top: 1px solid var(--glass-border);
+        border-right: none;
+      }
+      .dash-logo-badge, .dash-sidebar-footer {
+        display: none;
+      }
+      .dash-nav-menu {
+        flex-direction: row;
+        justify-content: space-around;
+        width: 100%;
+        gap: 0;
+      }
+      .dash-nav-btn {
+        padding: 0.5rem;
+        justify-content: center;
+      }
+      .dash-nav-btn span:not(.dash-badge) {
+        display: none;
+      }
+      .dash-main {
+        padding: 2rem 1.25rem 4rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Grain & Cursor -->
+  <div class="grain-overlay" aria-hidden="true"></div>
+  <div class="cursor-glow" aria-hidden="true"></div>
+
+  <div class="dash-layout">
+    <!-- Sidebar / Bottom Bar on Mobile -->
+    <aside class="dash-sidebar" role="navigation">
+      <div>
+        <a href="index.html" class="dash-logo-badge auraq-wordmark" style="margin-bottom: 2rem;">A U R A Q</a>
+        <div class="dash-bot-status" style="margin-top: -1.25rem; margin-bottom: 2rem;">
+          <div class="dash-bot-dot"></div>
+          <span>Active Nocturnal Agent</span>
+        </div>
+
+        <ul class="dash-nav-menu">
+          <li>
+            <button class="dash-nav-btn active" data-tab="overview">
+              <div class="dash-nav-item-left">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect width="7" height="9" x="3" y="3" rx="1"/><rect width="7" height="5" x="14" y="3" rx="1"/><rect width="7" height="9" x="14" y="12" rx="1"/><rect width="7" height="5" x="3" y="16" rx="1"/></svg>
+                <span>Overview</span>
+              </div>
+            </button>
+          </li>
+          <li>
+            <button class="dash-nav-btn" data-tab="orders">
+              <div class="dash-nav-item-left">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
+                <span>Orders</span>
+              </div>
+              <span class="dash-badge" id="sidebar-pending-badge" style="display: none;">0</span>
+            </button>
+          </li>
+          <li>
+            <button class="dash-nav-btn" data-tab="conversations">
+              <div class="dash-nav-item-left">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                <span>Conversations</span>
+              </div>
+            </button>
+          </li>
+          <li>
+            <button class="dash-nav-btn" data-tab="products">
+              <div class="dash-nav-item-left">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>
+                <span>Products</span>
+              </div>
+            </button>
+          </li>
+          <li>
+            <button class="dash-nav-btn" data-tab="faqs">
+              <div class="dash-nav-item-left">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                <span>FAQs</span>
+              </div>
+            </button>
+          </li>
+          <li>
+            <button class="dash-nav-btn" data-tab="test-chat">
+              <div class="dash-nav-item-left">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 7-7 7 7"/><path d="M12 19V5"/></svg>
+                <span>Test Chat</span>
+              </div>
+            </button>
+          </li>
+          <li>
+            <button class="dash-nav-btn" data-tab="settings">
+              <div class="dash-nav-item-left">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg>
+                <span>Settings</span>
+              </div>
+            </button>
+          </li>
+        </ul>
+      </div>
+
+      <div class="dash-sidebar-footer">
+        <div class="dash-store-label">
+          <span>Active Boutique</span>
+          <strong id="sidebar-store-name">ATELIER NOIR</strong>
+        </div>
+        <button class="btn btn-ghost btn-sm" id="btn-sidebar-logout" style="justify-content: flex-start; padding-left: 0;">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+          Log out
+        </button>
+      </div>
+    </aside>
+
+    <!-- Main Section Viewport -->
+    <main class="dash-main">
+      <div id="dash-global-toast" class="alert-box alert-success" style="display: none; position: fixed; bottom: 2rem; right: 2rem; z-index: 1000;" role="status"></div>
+
+      <!-- =====================================================================
+           SECTION 1: OVERVIEW
+           ===================================================================== -->
+      <section class="dash-section active" id="sec-overview">
+        <header class="dash-header-bar">
+          <div>
+            <h1 class="dash-header-title font-display">Command Overview</h1>
+            <p class="dash-header-subtitle">Performance breakdown and conversion trajectory across Telegram inquiries.</p>
+          </div>
+          <div>
+            <a href="setup.html" class="btn btn-secondary btn-sm">Onboarding Wizard</a>
+          </div>
+        </header>
+
+        <!-- Four Stat Cards -->
+        <div class="stat-cards-row">
+          <div class="stat-card-box">
+            <span class="stat-label-text">Conversations</span>
+            <div class="stat-num-value" id="stat-convos">0</div>
+          </div>
+          <div class="stat-card-box">
+            <span class="stat-label-text">Showed Interest</span>
+            <div class="stat-num-value" id="stat-interest">0</div>
+          </div>
+          <div class="stat-card-box">
+            <span class="stat-label-text">Wanted to Buy</span>
+            <div class="stat-num-value" id="stat-buy">0</div>
+          </div>
+          <div class="stat-card-box">
+            <span class="stat-label-text">Orders Confirmed</span>
+            <div class="stat-num-value text-ember" id="stat-confirmed">0</div>
+          </div>
+        </div>
+
+        <!-- Funnel Visual -->
+        <div class="funnel-container">
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <span class="stat-label-text" style="margin-bottom: 0;">Impulse-to-Order Conversion Funnel</span>
+            <span style="font-size: 0.8rem; color: var(--champagne);">Direct Instagram Bio Trajectory</span>
+          </div>
+
+          <div class="funnel-stages-row">
+            <div class="funnel-stage-col">
+              <span style="font-size: 0.8125rem; color: var(--bone); font-weight: 600;">100% Inquiries</span>
+              <div class="funnel-bar-track">
+                <div class="funnel-bar-fill" style="width: 100%;"></div>
+              </div>
+              <span style="font-size: 0.725rem; color: var(--muted-rose);">Initial Telegram trigger</span>
+            </div>
+
+            <div class="funnel-stage-col">
+              <span style="font-size: 0.8125rem; color: var(--bone); font-weight: 600;">61.8% Asked Specific Stock</span>
+              <div class="funnel-bar-track">
+                <div class="funnel-bar-fill" style="width: 61.8%;"></div>
+              </div>
+              <span style="font-size: 0.725rem; color: var(--muted-rose);">Sizes &amp; fit clarification</span>
+            </div>
+
+            <div class="funnel-stage-col">
+              <span style="font-size: 0.8125rem; color: var(--bone); font-weight: 600;">26.4% Reservation Requested</span>
+              <div class="funnel-bar-track">
+                <div class="funnel-bar-fill" style="width: 26.4%;"></div>
+              </div>
+              <span style="font-size: 0.725rem; color: var(--muted-rose);">Held in pending state</span>
+            </div>
+
+            <div class="funnel-stage-col">
+              <span style="font-size: 0.8125rem; color: var(--ember); font-weight: 600;">19.5% Owner Approved</span>
+              <div class="funnel-bar-track">
+                <div class="funnel-bar-fill active" style="width: 19.5%;"></div>
+              </div>
+              <span style="font-size: 0.725rem; color: var(--muted-rose);">Payment coordinated</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- 14-Day Line Chart & Top Asked Products -->
+        <div class="overview-split-grid">
+          <div class="chart-panel-box">
+            <h3 class="font-display" style="font-size: 1.15rem; margin-bottom: 1.25rem;">14-Day Nocturnal Velocity</h3>
+            <div style="height: 280px; position: relative;">
+              <canvas id="velocity-chart"></canvas>
+            </div>
+          </div>
+
+          <div class="top-prods-panel">
+            <h3 class="font-display" style="font-size: 1.15rem; margin-bottom: 1.25rem;">Most Inquired Items</h3>
+            <div id="top-products-list" style="display: flex; flex-direction: column; gap: 0.85rem;">
+              <!-- Populated via JS -->
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- =====================================================================
+           SECTION 2: ORDERS
+           ===================================================================== -->
+      <section class="dash-section" id="sec-orders">
+        <header class="dash-header-bar">
+          <div>
+            <h1 class="dash-header-title font-display">Order Requests</h1>
+            <p class="dash-header-subtitle">Reservation requests collected by the Telegram assistant awaiting your manual signature.</p>
+          </div>
+          <div style="display: flex; gap: 0.5rem;" id="order-filter-buttons">
+            <button class="btn btn-secondary btn-sm active" data-filter="all">All</button>
+            <button class="btn btn-secondary btn-sm" data-filter="pending">Pending</button>
+            <button class="btn btn-secondary btn-sm" data-filter="confirmed">Confirmed</button>
+            <button class="btn btn-secondary btn-sm" data-filter="rejected">Rejected</button>
+          </div>
+        </header>
+
+        <div class="orders-table-wrapper" id="orders-container">
+          <!-- Populated dynamically via JS -->
+        </div>
+      </section>
+
+      <!-- =====================================================================
+           SECTION 3: CONVERSATIONS
+           ===================================================================== -->
+      <section class="dash-section" id="sec-conversations">
+        <header class="dash-header-bar">
+          <div>
+            <h1 class="dash-header-title font-display">Customer Logs</h1>
+            <p class="dash-header-subtitle">Inspect full transcripts of customer questions and autonomous replies.</p>
+          </div>
+        </header>
+
+        <div class="convos-split-view" id="convos-container">
+          <!-- Left: Threads -->
+          <div class="convos-thread-list" id="convos-threads">
+            <!-- Threads inserted via JS -->
+          </div>
+
+          <!-- Right: Chat Window -->
+          <div class="convos-chat-window">
+            <div class="chat-window-header">
+              <div>
+                <strong id="active-chat-title" style="color: var(--bone);">Select a conversation</strong>
+                <span id="active-chat-sub" style="display: block; font-size: 0.75rem; color: var(--muted-rose);">Click any thread on the left to inspect</span>
+              </div>
+              <div id="active-chat-escalated-pill" style="display: none;">
+                <span class="status-chip status-pending">Escalated to Owner</span>
+              </div>
+            </div>
+
+            <div class="chat-messages-container" id="chat-messages-feed">
+              <div class="empty-state">
+                <svg class="empty-state-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                  <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                </svg>
+                <h4 class="empty-state-title">No transcript selected</h4>
+                <p class="empty-state-text">Choose a customer thread from the left column to read the interaction.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- =====================================================================
+           SECTION 4: PRODUCTS
+           ===================================================================== -->
+      <section class="dash-section" id="sec-products">
+        <header class="dash-header-bar">
+          <div>
+            <h1 class="dash-header-title font-display">Catalog Management</h1>
+            <p class="dash-header-subtitle">Update stock counts, prices, and available size/color combinations.</p>
+          </div>
+          <button class="btn btn-ember btn-sm" id="btn-open-add-product">+ Add Product</button>
+        </header>
+
+        <div id="dash-products-stream" class="items-stream">
+          <!-- Populated via JS -->
+        </div>
+      </section>
+
+      <!-- =====================================================================
+           SECTION 5: FAQS
+           ===================================================================== -->
+      <section class="dash-section" id="sec-faqs">
+        <header class="dash-header-bar">
+          <div>
+            <h1 class="dash-header-title font-display">Knowledge & FAQs</h1>
+            <p class="dash-header-subtitle">Boutique rules, sizing guidance, and store policies memorized by the agent.</p>
+          </div>
+          <button class="btn btn-ember btn-sm" id="btn-open-add-faq">+ Add FAQ</button>
+        </header>
+
+        <div id="dash-faqs-stream" class="items-stream">
+          <!-- Populated via JS -->
+        </div>
+      </section>
+
+      <!-- =====================================================================
+           SECTION 6: TEST CHAT
+           ===================================================================== -->
+      <section class="dash-section" id="sec-test-chat">
+        <header class="dash-header-bar">
+          <div>
+            <h1 class="dash-header-title font-display">Interactive Agent Simulator</h1>
+            <p class="dash-header-subtitle">Test how your bot responds to customer inquiries using your live catalog and rules.</p>
+          </div>
+        </header>
+
+        <div class="test-chat-box">
+          <div class="test-chat-feed" id="test-chat-feed">
+            <div class="chat-bubble assistant">
+              Hello! I am your boutique’s nocturnal Auraq assistant. Ask me about your stock, sizes, delivery, or ask to place an order.
+              <div class="chat-meta">Auraq Autonomous Agent</div>
+            </div>
+          </div>
+
+          <form id="test-chat-form" class="test-chat-input-bar">
+            <input type="text" id="test-chat-input" class="form-input" placeholder="Type a customer question (e.g. Do you have the crimson hoodie in L?)..." required autocomplete="off">
+            <button type="submit" class="btn btn-ember btn-sm" id="test-chat-submit">Send</button>
+          </form>
+        </div>
+      </section>
+
+      <!-- =====================================================================
+           SECTION 7: SETTINGS
+           ===================================================================== -->
+      <section class="dash-section" id="sec-settings">
+        <header class="dash-header-bar">
+          <div>
+            <h1 class="dash-header-title font-display">Store Settings</h1>
+            <p class="dash-header-subtitle">Configure business coordinates, copy your shareable Telegram link, or sign out.</p>
+          </div>
+        </header>
+
+        <div class="glass-panel" style="padding: 2.5rem; max-width: 780px;">
+          <form id="settings-form" novalidate>
+            <div class="form-group">
+              <label class="form-label" for="settings-name">Business Label Name</label>
+              <input type="text" id="settings-name" class="form-input" readonly>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="settings-desc">Studio Narrative / Brand Story</label>
+              <textarea id="settings-desc" rows="3" class="form-textarea"></textarea>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem;">
+              <div class="form-group">
+                <label class="form-label" for="settings-hours">Studio Hours</label>
+                <input type="text" id="settings-hours" class="form-input">
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="settings-city">Location / City</label>
+                <input type="text" id="settings-city" class="form-input">
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="settings-contact">Owner Telegram Contact (for escalations)</label>
+              <input type="text" id="settings-contact" class="form-input">
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="settings-tg-link">Shareable Instagram Bio Link</label>
+              <div style="display: flex; gap: 0.5rem;">
+                <input type="text" id="settings-tg-link" class="form-input" readonly>
+                <button type="button" class="btn btn-secondary" id="btn-copy-settings-link">Copy</button>
+              </div>
+            </div>
+
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 2rem; padding-top: 1.5rem; border-top: 1px solid var(--glass-border);">
+              <button type="button" class="btn btn-ghost" id="btn-settings-logout">Sign Out</button>
+              <button type="submit" class="btn btn-ember" id="btn-save-settings">Save Changes</button>
+            </div>
+          </form>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script src="js/config.js"></script>
+  <script src="js/api.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/dashboard.js"></script>
+</body>
+</html>
