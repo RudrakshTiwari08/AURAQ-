@@ -282,37 +282,159 @@
       </table>
     `;
 
-    // Attach Confirm handlers
+    // Attach Confirm and Reject handlers
+    attachOrderActionHandlers(container);
+  }
+
+  // Open confirmation dialog for Reject with Cancel and Reject buttons
+  function openRejectOrderDialog() {
+    return new Promise((resolve) => {
+      const modal = document.getElementById('reject-order-modal');
+      const cancelBtn = document.getElementById('reject-order-cancel-btn');
+      const confirmBtn = document.getElementById('reject-order-confirm-btn');
+
+      if (!modal || !cancelBtn || !confirmBtn) {
+        // Fallback to window.confirm if modal element is not in DOM
+        const ok = window.confirm('Reject this order? The customer will be told it could not be fulfilled.');
+        resolve(ok);
+        return;
+      }
+
+      modal.style.display = 'flex';
+
+      function cleanUp() {
+        modal.style.display = 'none';
+        cancelBtn.removeEventListener('click', onCancel);
+        confirmBtn.removeEventListener('click', onConfirm);
+      }
+
+      function onCancel() {
+        cleanUp();
+        resolve(false);
+      }
+
+      function onConfirm() {
+        cleanUp();
+        resolve(true);
+      }
+
+      cancelBtn.addEventListener('click', onCancel);
+      confirmBtn.addEventListener('click', onConfirm);
+    });
+  }
+
+  // Handle order confirmation
+  async function handleOrderConfirm(orderId, buttonEl) {
+    const row = buttonEl.closest('tr');
+    const buttons = row ? row.querySelectorAll('button') : [];
+    buttons.forEach(b => { b.disabled = true; });
+
+    const prevErr = row ? row.querySelector('.order-inline-error') : null;
+    if (prevErr) prevErr.remove();
+
+    try {
+      await window.api.confirmOrder(orderId);
+      const order = allOrders.find(o => o.id === orderId);
+      if (order) order.status = 'confirmed';
+      updatePendingSidebarBadge();
+      updateOrderRowInTable(orderId, 'confirmed');
+      showToast('Order confirmed! Customer notified on Telegram.');
+    } catch (err) {
+      buttons.forEach(b => { b.disabled = false; });
+      if (row) {
+        const errSpan = document.createElement('div');
+        errSpan.className = 'order-inline-error';
+        errSpan.style.cssText = 'color: var(--ember); font-size: 0.75rem; margin-top: 0.35rem;';
+        errSpan.textContent = 'Failed: ' + err.message;
+        row.querySelector('td:last-child').appendChild(errSpan);
+      }
+      showToast('Failed to confirm order: ' + err.message, true);
+    }
+  }
+
+  // Handle order rejection
+  async function handleOrderReject(orderId, buttonEl) {
+    const confirmed = await openRejectOrderDialog();
+    if (!confirmed) return;
+
+    const row = buttonEl.closest('tr');
+    const buttons = row ? row.querySelectorAll('button') : [];
+    buttons.forEach(b => { b.disabled = true; });
+
+    const prevErr = row ? row.querySelector('.order-inline-error') : null;
+    if (prevErr) prevErr.remove();
+
+    try {
+      await window.api.rejectOrder(orderId);
+      const order = allOrders.find(o => o.id === orderId);
+      if (order) order.status = 'rejected';
+      updatePendingSidebarBadge();
+      updateOrderRowInTable(orderId, 'rejected');
+      showToast('Order marked rejected. Customer notified on Telegram.');
+    } catch (err) {
+      buttons.forEach(b => { b.disabled = false; });
+      if (row) {
+        const errSpan = document.createElement('div');
+        errSpan.className = 'order-inline-error';
+        errSpan.style.cssText = 'color: var(--ember); font-size: 0.75rem; margin-top: 0.35rem;';
+        errSpan.textContent = 'Failed: ' + err.message;
+        row.querySelector('td:last-child').appendChild(errSpan);
+      }
+      showToast('Failed to reject order: ' + err.message, true);
+    }
+  }
+
+  // Update a single table row without full table re-render
+  function updateOrderRowInTable(orderId, newStatus) {
+    const container = document.getElementById('orders-container');
+    if (!container) return;
+    const confirmBtn = container.querySelector(`[data-order-confirm="${orderId}"]`);
+    const rejectBtn = container.querySelector(`[data-order-reject="${orderId}"]`);
+    const targetBtn = confirmBtn || rejectBtn;
+    if (!targetBtn) {
+      renderOrdersTable();
+      return;
+    }
+    const row = targetBtn.closest('tr');
+    if (!row) {
+      renderOrdersTable();
+      return;
+    }
+
+    if (currentOrderFilter !== 'all' && currentOrderFilter !== newStatus) {
+      row.remove();
+      const remainingRows = container.querySelectorAll('tbody tr');
+      if (remainingRows.length === 0) {
+        renderOrdersTable();
+      }
+      return;
+    }
+
+    const statusTd = row.children[2];
+    const actionsTd = row.children[4];
+    if (statusTd) {
+      const chipClass = newStatus === 'confirmed' ? 'status-confirmed' : 'status-rejected';
+      const chipLabel = newStatus === 'confirmed' ? 'Confirmed' : 'Rejected';
+      statusTd.innerHTML = `<span class="status-chip ${chipClass}">${chipLabel}</span>`;
+    }
+    if (actionsTd) {
+      actionsTd.innerHTML = '<span class="text-muted" style="font-size: 0.8rem;">Completed</span>';
+    }
+  }
+
+  // Attach event listeners to confirm and reject buttons
+  function attachOrderActionHandlers(container) {
     container.querySelectorAll('[data-order-confirm]').forEach(btn => {
-      btn.addEventListener('click', async (e) => {
+      btn.addEventListener('click', (e) => {
         const id = e.currentTarget.getAttribute('data-order-confirm');
-        try {
-          await window.api.confirmOrder(id);
-          const order = allOrders.find(o => o.id === id);
-          if (order) order.status = 'confirmed';
-          renderOrdersTable();
-          updatePendingSidebarBadge();
-          showToast('Order confirmed! Customer notified on Telegram.');
-        } catch (err) {
-          showToast('Failed to confirm order: ' + err.message, true);
-        }
+        handleOrderConfirm(id, e.currentTarget);
       });
     });
 
-    // Attach Reject handlers
     container.querySelectorAll('[data-order-reject]').forEach(btn => {
-      btn.addEventListener('click', async (e) => {
+      btn.addEventListener('click', (e) => {
         const id = e.currentTarget.getAttribute('data-order-reject');
-        try {
-          await window.api.rejectOrder(id);
-          const order = allOrders.find(o => o.id === id);
-          if (order) order.status = 'rejected';
-          renderOrdersTable();
-          updatePendingSidebarBadge();
-          showToast('Order marked rejected.');
-        } catch (err) {
-          showToast('Failed to reject order: ' + err.message, true);
-        }
+        handleOrderReject(id, e.currentTarget);
       });
     });
   }
@@ -727,6 +849,205 @@
     if (sidebarLogout) sidebarLogout.addEventListener('click', handleLogout);
   }
 
+  // Requirement 7: CSV Upload and Sample Download in Dashboard Products tab
+  function initDashboardCsv() {
+    const sampleBtn = document.getElementById('btn-dash-download-sample-csv');
+    const fileInput = document.getElementById('dash-csv-file-input');
+    const statusLabel = document.getElementById('dash-csv-status');
+    const feedbackBox = document.getElementById('dash-csv-feedback-box');
+
+    if (sampleBtn) {
+      sampleBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        const sampleText = "name,price,category,size,colour,stock\nHeavyweight Boxy Tee,899,T-Shirts,M,Noir,10\nHeavyweight Boxy Tee,899,T-Shirts,L,Noir,15\nRaw Selvedge Denim,2499,Jeans,32,Indigo,8\nOverdyed Crimson Hoodie,1899,Hoodies,L,Crimson,12\nWaxed Combat Boot,2999,Shoes,42,Black,6\n";
+        const blob = new Blob([sampleText], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'auraq_catalog_sample.csv';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+      });
+    }
+
+    if (fileInput) {
+      fileInput.addEventListener('change', async () => {
+        if (!fileInput.files || !fileInput.files[0]) return;
+        const file = fileInput.files[0];
+
+        if (statusLabel) statusLabel.textContent = 'Validating & uploading...';
+        if (feedbackBox) {
+          feedbackBox.style.display = 'none';
+          feedbackBox.className = 'alert-box';
+        }
+
+        try {
+          const result = await window.api.uploadProductsCsv(file);
+          const importedProds = result.imported_products ?? result.imported ?? 0;
+          const importedVars = result.imported_variants ?? 0;
+          const rejected = result.rejected_rows || [];
+
+          let summary = `Imported ${importedProds} products`;
+          if (importedVars > 0) summary += ` (${importedVars} variants)`;
+          if (rejected.length > 0) summary += ` — ${rejected.length} rows rejected`;
+
+          if (statusLabel) statusLabel.textContent = 'Upload complete';
+          showToast(summary);
+
+          if (feedbackBox) {
+            let html = `<strong>Import Successful:</strong> ${summary}`;
+            if (rejected.length > 0) {
+              html += `<ul style="margin-top: 0.5rem; padding-left: 1.25rem; font-size: 0.775rem;">${rejected.map(r => `<li>Row ${r.row}: ${r.reason || 'Invalid format'}</li>`).join('')}</ul>`;
+            }
+            feedbackBox.innerHTML = html;
+            feedbackBox.className = rejected.length > 0 ? 'alert-box alert-error' : 'alert-box alert-success';
+            feedbackBox.style.display = 'block';
+          }
+
+          loadProducts();
+          fileInput.value = '';
+        } catch (err) {
+          if (statusLabel) statusLabel.textContent = 'Import failed';
+          showToast('CSV import failed: ' + err.message, true);
+          if (feedbackBox) {
+            feedbackBox.textContent = 'CSV import failed: ' + err.message;
+            feedbackBox.className = 'alert-box alert-error';
+            feedbackBox.style.display = 'block';
+          }
+          fileInput.value = '';
+        }
+      });
+    }
+  }
+
+  // Requirement 9: Live Refresh every 20s using Page Visibility API
+  // Does not reload page, reset scroll position, or break open conversations.
+  let refreshTimer = null;
+  let secondsSinceRefresh = 0;
+  let labelTimer = null;
+
+  function updateRefreshLabels(text) {
+    document.querySelectorAll('.refresh-indicator').forEach(el => {
+      el.textContent = text;
+    });
+  }
+
+  async function performLiveRefresh() {
+    if (document.hidden) return;
+
+    try {
+      // 1. Refresh Overview stats silently without page reload
+      const stats = await window.api.getDashboardStats();
+      if (stats) {
+        const elConvos = document.getElementById('stat-convos');
+        const elInterest = document.getElementById('stat-interest');
+        const elBuy = document.getElementById('stat-buy');
+        const elConfirmed = document.getElementById('stat-confirmed');
+        if (elConvos) elConvos.textContent = (stats.conversations || 0).toLocaleString();
+        if (elInterest) elInterest.textContent = (stats.interested || 0).toLocaleString();
+        if (elBuy) elBuy.textContent = (stats.wants_to_buy || 0).toLocaleString();
+        if (elConfirmed) elConfirmed.textContent = (stats.confirmed_orders || 0).toLocaleString();
+      }
+
+      // 2. Refresh Orders without resetting scroll
+      const orders = await window.api.getOrders();
+      if (Array.isArray(orders)) {
+        allOrders = orders;
+        updatePendingSidebarBadge();
+        // Only re-render orders table if on orders tab
+        if (currentTab === 'orders') {
+          renderOrdersTable();
+        }
+      }
+
+      // 3. Refresh Conversations list without clearing active open thread
+      if (currentTab === 'conversations') {
+        const convos = await window.api.getConversations();
+        const threadsContainer = document.getElementById('convos-threads');
+        if (threadsContainer && Array.isArray(convos)) {
+          // Identify currently active thread label
+          const activeThreadEl = threadsContainer.querySelector('.thread-item.active .thread-name');
+          const activeLabel = activeThreadEl ? activeThreadEl.textContent.trim() : null;
+
+          threadsContainer.innerHTML = '';
+          convos.forEach(c => {
+            const isActive = activeLabel ? (c.customer_label === activeLabel) : false;
+            const threadBtn = document.createElement('button');
+            threadBtn.className = `thread-item ${isActive ? 'active' : ''}`;
+            const lastMsg = (c.messages && c.messages.length > 0) ? c.messages[c.messages.length - 1].text : '';
+
+            threadBtn.innerHTML = `
+              <div class="thread-header">
+                <span class="thread-name">${c.customer_label}</span>
+                <span class="thread-time">${c.last_message_at}</span>
+              </div>
+              <div class="thread-preview">${lastMsg}</div>
+              ${c.escalated ? '<span class="status-chip status-pending" style="margin-top: 0.35rem; font-size: 0.65rem;">Escalated</span>' : ''}
+            `;
+
+            threadBtn.addEventListener('click', () => {
+              document.querySelectorAll('.thread-item').forEach(b => b.classList.remove('active'));
+              threadBtn.classList.add('active');
+              displayConversation(c);
+            });
+
+            threadsContainer.appendChild(threadBtn);
+          });
+        }
+      }
+
+      secondsSinceRefresh = 0;
+      updateRefreshLabels('Updated just now');
+    } catch (e) {
+      console.warn('Live refresh error', e);
+    }
+  }
+
+  function startLiveRefreshPolling() {
+    stopLiveRefreshPolling();
+    secondsSinceRefresh = 0;
+    updateRefreshLabels('Updated just now');
+
+    // 20-second data poll
+    refreshTimer = setInterval(() => {
+      performLiveRefresh();
+    }, 20000);
+
+    // 1-second label counter ("Updated just now" -> "Updated 20s ago")
+    labelTimer = setInterval(() => {
+      if (document.hidden) return;
+      secondsSinceRefresh += 1;
+      if (secondsSinceRefresh < 5) {
+        updateRefreshLabels('Updated just now');
+      } else {
+        updateRefreshLabels(`Updated ${secondsSinceRefresh}s ago`);
+      }
+    }, 1000);
+  }
+
+  function stopLiveRefreshPolling() {
+    if (refreshTimer) {
+      clearInterval(refreshTimer);
+      refreshTimer = null;
+    }
+    if (labelTimer) {
+      clearInterval(labelTimer);
+      labelTimer = null;
+    }
+  }
+
+  // Page Visibility API integration
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden) {
+      stopLiveRefreshPolling();
+    } else {
+      performLiveRefresh();
+      startLiveRefreshPolling();
+    }
+  });
+
   // Initialize on DOM Ready
   document.addEventListener('DOMContentLoaded', () => {
     initTabNavigation();
@@ -735,6 +1056,7 @@
     initAddFaqButton();
     initTestChat();
     initSettingsForm();
+    initDashboardCsv();
 
     // Default load Overview
     loadOverviewStats();
@@ -757,5 +1079,8 @@
         }
       }
     }).catch(() => {});
+
+    // Start background live polling
+    startLiveRefreshPolling();
   });
 })();

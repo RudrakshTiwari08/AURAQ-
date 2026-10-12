@@ -639,7 +639,8 @@
             <h1 class="dash-header-title font-display">Command Overview</h1>
             <p class="dash-header-subtitle">Performance breakdown and conversion trajectory across Telegram inquiries.</p>
           </div>
-          <div>
+          <div style="display: flex; gap: 0.75rem; align-items: center;">
+            <span class="refresh-indicator" style="font-size: 0.75rem; color: var(--muted-rose); background: rgba(24, 4, 10, 0.6); padding: 0.25rem 0.65rem; border-radius: 999px; border: 1px solid var(--glass-border);">Updated just now</span>
             <a href="setup.html" class="btn btn-secondary btn-sm">Onboarding Wizard</a>
           </div>
         </header>
@@ -732,12 +733,19 @@
           <div>
             <h1 class="dash-header-title font-display">Order Requests</h1>
             <p class="dash-header-subtitle">Reservation requests collected by the Telegram assistant awaiting your manual signature.</p>
+            <p style="font-size: 0.775rem; color: var(--champagne); margin-top: 0.35rem;">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display: inline-block; vertical-align: middle; margin-right: 0.25rem;"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+              The customer is notified on Telegram when you confirm or reject.
+            </p>
           </div>
-          <div style="display: flex; gap: 0.5rem;" id="order-filter-buttons">
-            <button class="btn btn-secondary btn-sm active" data-filter="all">All</button>
-            <button class="btn btn-secondary btn-sm" data-filter="pending">Pending</button>
-            <button class="btn btn-secondary btn-sm" data-filter="confirmed">Confirmed</button>
-            <button class="btn btn-secondary btn-sm" data-filter="rejected">Rejected</button>
+          <div style="display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap;">
+            <span class="refresh-indicator" style="font-size: 0.75rem; color: var(--muted-rose); background: rgba(24, 4, 10, 0.6); padding: 0.25rem 0.65rem; border-radius: 999px; border: 1px solid var(--glass-border);">Updated just now</span>
+            <div style="display: flex; gap: 0.5rem;" id="order-filter-buttons">
+              <button class="btn btn-secondary btn-sm active" data-filter="all">All</button>
+              <button class="btn btn-secondary btn-sm" data-filter="pending">Pending</button>
+              <button class="btn btn-secondary btn-sm" data-filter="confirmed">Confirmed</button>
+              <button class="btn btn-secondary btn-sm" data-filter="rejected">Rejected</button>
+            </div>
           </div>
         </header>
 
@@ -799,6 +807,30 @@
           </div>
           <button class="btn btn-ember btn-sm" id="btn-open-add-product">+ Add Product</button>
         </header>
+
+        <!-- CSV Bulk Import Help Box & Sample Download (Requirement 7) -->
+        <div class="glass-card" style="padding: 1.25rem; margin-bottom: 1.25rem;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem; flex-wrap: wrap; gap: 0.5rem;">
+            <strong style="font-size: 0.85rem; color: var(--bone);">CSV Catalog Schema:</strong>
+            <button type="button" class="btn btn-ghost btn-sm" id="btn-dash-download-sample-csv" style="padding: 0; color: var(--ember); font-size: 0.8rem; text-decoration: underline;">
+              Download sample CSV
+            </button>
+          </div>
+          <p style="font-size: 0.8rem; color: var(--muted-rose); font-family: monospace; background: rgba(11,3,6,0.6); padding: 0.5rem; border-radius: 6px;">
+            name,price,category,size,colour,stock
+          </p>
+          <p style="font-size: 0.75rem; color: var(--muted-rose); margin-top: 0.4rem;">
+            One row per variant. Rows with the same name belong to the same product.
+          </p>
+          <div style="margin-top: 0.85rem; display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap;">
+            <label for="dash-csv-file-input" class="btn btn-secondary btn-sm" style="cursor: pointer;">
+              Upload CSV File
+            </label>
+            <input type="file" id="dash-csv-file-input" accept=".csv" style="display: none;">
+            <span id="dash-csv-status" style="font-size: 0.8rem; color: var(--muted-rose);"></span>
+          </div>
+          <div id="dash-csv-feedback-box" class="alert-box" style="display: none; margin-top: 0.85rem;"></div>
+        </div>
 
         <div id="dash-products-stream" class="items-stream">
           <!-- Populated via JS -->
@@ -916,6 +948,20 @@
         </div>
       </section>
     </main>
+  </div>
+
+  <!-- Confirmation Modal for Rejecting Orders -->
+  <div id="reject-order-modal" class="modal-backdrop" style="display: none; position: fixed; inset: 0; background: rgba(5, 0, 2, 0.78); backdrop-filter: blur(8px); z-index: 9999; align-items: center; justify-content: center;">
+    <div class="glass-card" style="max-width: 440px; width: 90%; padding: 2rem; border-radius: 12px; border: 1px solid var(--glass-border); box-shadow: 0 20px 40px rgba(0,0,0,0.6);">
+      <h3 style="font-family: var(--font-display); font-size: 1.25rem; color: var(--bone); margin-bottom: 0.75rem;">Reject Order</h3>
+      <p style="color: var(--muted-rose); font-size: 0.875rem; line-height: 1.5; margin-bottom: 1.5rem;">
+        Reject this order? The customer will be told it could not be fulfilled.
+      </p>
+      <div style="display: flex; gap: 0.75rem; justify-content: flex-end;">
+        <button type="button" class="btn btn-secondary btn-sm" id="reject-order-cancel-btn">Cancel</button>
+        <button type="button" class="btn btn-ember btn-sm" id="reject-order-confirm-btn">Reject</button>
+      </div>
+    </div>
   </div>
 
   <script src="js/config.js"></script>
