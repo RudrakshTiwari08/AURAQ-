@@ -41,32 +41,38 @@
           <div class="form-group">
             <label class="form-label" for="name">Owner Full Name</label>
             <input type="text" id="name" name="name" class="form-input" placeholder="e.g. Vivienne Westwood" required autocomplete="name">
+            <span id="name-error" class="form-error" style="display: none;"></span>
           </div>
 
           <div class="form-group">
             <label class="form-label" for="email">Business Email</label>
-            <input type="email" id="email" name="email" class="form-input" placeholder="vivienne@atelier.com" required autocomplete="email">
+            <input type="email" id="email" name="email" class="form-input" placeholder="owner@yourbrand.com" required autocomplete="email">
+            <span id="email-error" class="form-error" style="display: none;"></span>
           </div>
 
           <div class="form-group">
             <label class="form-label" for="password">Password</label>
-            <input type="password" id="password" name="password" class="form-input" placeholder="••••••••••••" required autocomplete="new-password">
+            <input type="password" id="password" name="password" class="form-input" placeholder="•••••••••••• (min. 8 characters)" required autocomplete="new-password">
+            <span id="password-error" class="form-error" style="display: none;"></span>
           </div>
 
           <div class="form-group">
             <label class="form-label" for="business-name">Business / Label Name</label>
-            <input type="text" id="business-name" name="business_name" class="form-input" placeholder="e.g. Atelier Noir" required>
+            <input type="text" id="business-name" name="business_name" class="form-input" placeholder="e.g. Studio Noir (max 80 chars)" maxlength="80" required>
+            <span id="business-name-error" class="form-error" style="display: none;"></span>
           </div>
 
           <div class="form-group">
             <label class="form-label" for="business-type">Store Category</label>
             <select id="business-type" name="business_type" class="form-input form-select" required>
+              <option value="" disabled>Select Store Category</option>
               <option value="Clothing" selected>Clothing & Fashion</option>
               <option value="Salon">Salon & Wellness</option>
               <option value="Cafe">Specialty Cafe & Roastery</option>
               <option value="Electronics">Electronics & Hardware</option>
               <option value="Other">Other Independent Goods</option>
             </select>
+            <span id="business-type-error" class="form-error" style="display: none;"></span>
           </div>
 
           <button type="submit" id="signup-submit" class="btn btn-ember" style="width: 100%; margin-top: 1rem;">

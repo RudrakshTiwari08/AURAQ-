@@ -346,18 +346,18 @@
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem;">
           <div class="form-group">
             <label class="form-label" for="store-hours">Studio Hours</label>
-            <input type="text" id="store-hours" class="form-input" placeholder="Tuesday – Sunday, 11:00 – 20:00 CET">
+            <input type="text" id="store-hours" class="form-input" placeholder="Tuesday – Sunday, 11:00 – 20:00 IST">
           </div>
 
           <div class="form-group">
             <label class="form-label" for="store-city">Studio City / Location</label>
-            <input type="text" id="store-city" class="form-input" placeholder="Milan, Via Tortona 19">
+            <input type="text" id="store-city" class="form-input" placeholder="e.g. Colaba, Mumbai">
           </div>
         </div>
 
         <div class="form-group">
           <label class="form-label" for="owner-contact">Owner Escalation Contact</label>
-          <input type="text" id="owner-contact" class="form-input" placeholder="@ateliernoir_milano or +39 02 8821">
+          <input type="text" id="owner-contact" class="form-input" placeholder="e.g. @your_boutique or +91 98765 43210">
           <span class="form-help">Where the assistant routes complex requests when a customer demands human review.</span>
         </div>
 
@@ -401,8 +401,8 @@
               <input type="text" id="prod-name" class="form-input" placeholder="e.g. Overdyed Crimson Hoodie" required>
             </div>
             <div class="form-group" style="margin-bottom: 0;">
-              <label class="form-label" for="prod-price">Price ($)</label>
-              <input type="number" id="prod-price" class="form-input" placeholder="120" required min="0">
+              <label class="form-label" for="prod-price">Price (₹)</label>
+              <input type="number" id="prod-price" class="form-input" placeholder="1899" required min="0">
             </div>
             <div class="form-group" style="margin-bottom: 0;">
               <label class="form-label" for="prod-cat">Category</label>
@@ -436,7 +436,22 @@
         </form>
       </div>
 
-      <!-- CSV Bulk Import -->
+      <!-- CSV Bulk Import Help Box & Sample Download (Requirement 7) -->
+      <div class="glass-card" style="padding: 1.25rem; margin-bottom: 1rem;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+          <strong style="font-size: 0.85rem; color: var(--bone);">CSV Catalog Schema:</strong>
+          <button type="button" class="btn btn-ghost btn-sm" id="btn-download-sample-csv" style="padding: 0; color: var(--ember); font-size: 0.8rem; text-decoration: underline;">
+            Download sample CSV
+          </button>
+        </div>
+        <p style="font-size: 0.8rem; color: var(--muted-rose); font-family: monospace; background: rgba(11,3,6,0.6); padding: 0.5rem; border-radius: 6px;">
+          name,price,category,size,colour,stock
+        </p>
+        <p style="font-size: 0.75rem; color: var(--muted-rose); margin-top: 0.4rem;">
+          One row per variant. Rows with the same name belong to the same product.
+        </p>
+      </div>
+
       <div class="csv-drop-zone" id="csv-drop-zone" role="button" tabindex="0">
         <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="var(--muted-rose)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="margin-bottom: 0.5rem;" aria-hidden="true">
           <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
@@ -444,9 +459,10 @@
           <line x1="12" y1="3" x2="12" y2="15"/>
         </svg>
         <p style="font-weight: 600; color: var(--bone); margin-bottom: 0.25rem;">Bulk Import Catalog via CSV</p>
-        <p style="font-size: 0.8125rem; color: var(--muted-rose);">Format: Name, Price, Category, Size, Colour, Stock</p>
+        <p style="font-size: 0.8125rem; color: var(--muted-rose);">Click or drag &amp; drop validated .csv</p>
         <input type="file" id="csv-file-input" accept=".csv" style="display: none;">
       </div>
+      <div id="csv-feedback-box" class="alert-box" style="display: none; margin-top: 1rem;"></div>
 
       <div class="step-actions">
         <button type="button" class="btn btn-secondary" id="btn-back-to-1">Back</button>
@@ -539,19 +555,29 @@
         </p>
 
         <!-- In-Page Rendered QR Code -->
-        <div class="qr-container">
+        <div class="qr-container" id="qr-code-wrapper">
           <canvas id="qr-canvas" width="200" height="200" aria-label="QR Code to launch Telegram bot"></canvas>
           <span style="font-size: 0.75rem; color: var(--muted-rose); margin-top: 0.75rem; letter-spacing: 0.05em;">
             Scan to test in Telegram
           </span>
         </div>
 
-        <!-- Shareable Link Copy -->
+        <!-- Preparing State (Requirement 4) -->
+        <div id="link-preparing-box" class="glass-card" style="display: none; max-width: 420px; margin: 2rem auto; padding: 2rem; flex-direction: column; align-items: center; gap: 1rem;">
+          <span class="spinner spinner-light"></span>
+          <p style="font-size: 0.95rem; color: var(--bone);">Your link is being prepared</p>
+          <button type="button" class="btn btn-secondary btn-sm" id="btn-retry-telegram-link">Retry</button>
+        </div>
+
+        <!-- Shareable Link Copy & Open in Telegram (Requirement 4) -->
         <div class="share-link-group">
-          <input type="text" id="tg-share-link" class="form-input" readonly value="https://t.me/brand_sales_bot?start=ateliernoir">
+          <input type="text" id="tg-share-link" class="form-input" readonly value="">
           <button type="button" class="btn btn-secondary" id="btn-copy-link">
             Copy Link
           </button>
+          <a href="#" class="btn btn-secondary" id="btn-open-telegram" target="_blank" rel="noopener" style="display: none;">
+            Open in Telegram
+          </a>
         </div>
 
         <!-- Alert & Actions -->
