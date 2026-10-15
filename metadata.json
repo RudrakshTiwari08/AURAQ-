@@ -1,8 +1,0 @@
-{
-  "name": "AURAQ",
-  "description": "Midnight, red, and a shop that never closes. AI sales assistant on Telegram for Instagram small businesses.",
-  "requestFramePermissions": [],
-  "majorCapabilities": [
-    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
-  ]
-}
