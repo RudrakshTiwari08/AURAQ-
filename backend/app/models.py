@@ -67,3 +67,13 @@ class Variant(Base):
     stock: Mapped[int] = mapped_column(default=0)
 
     product: Mapped["Product"] = relationship(back_populates="variants")
+
+
+class FAQ(Base):
+    """One question/answer the assistant may use. Always belongs to one business."""
+    __tablename__ = "faqs"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    business_id: Mapped[int] = mapped_column(ForeignKey("businesses.id"), index=True)
+    question: Mapped[str] = mapped_column(String(300))
+    answer: Mapped[str] = mapped_column(Text)

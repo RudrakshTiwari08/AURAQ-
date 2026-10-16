@@ -3,7 +3,7 @@ from fastapi.staticfiles import StaticFiles
 
 from .config import FRONTEND_DIR
 from .database import Base, engine
-from .routers import auth, business
+from .routers import auth, business, faqs, products
 
 # Create any missing tables when the server starts
 Base.metadata.create_all(bind=engine)
@@ -13,6 +13,8 @@ app = FastAPI(title="AURAQ API")
 # API routes first...
 app.include_router(auth.router)
 app.include_router(business.router)
+app.include_router(products.router)
+app.include_router(faqs.router)
 
 
 @app.get("/health")
