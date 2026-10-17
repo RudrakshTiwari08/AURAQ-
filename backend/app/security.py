@@ -34,3 +34,25 @@ def decode_token(token: str) -> int | None:
         return int(payload["sub"])
     except (jwt.PyJWTError, KeyError, ValueError):
         return None
+
+
+# --- Telegram "connect my alerts" link: signed, so nobody can guess another owner's ---
+import hashlib
+import hmac
+
+
+def owner_connect_code(business_id: int) -> str:
+    sig = hmac.new(SECRET_KEY.encode(), f"owner:{business_id}".encode(), hashlib.sha256).hexdigest()[:24]
+    return f"{business_id}-{sig}"
+
+
+def verify_owner_code(code: str) -> int | None:
+    """Return the business id if the code is genuine, else None."""
+    try:
+        id_part, _ = code.split("-", 1)
+        business_id = int(id_part)
+    except (ValueError, AttributeError):
+        return None
+    if hmac.compare_digest(owner_connect_code(business_id), code):
+        return business_id
+    return None

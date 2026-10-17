@@ -5,7 +5,7 @@
 
 const CONFIG = {
   // Single source for mock switch: flip to false to connect to live FastAPI backend
-  USE_MOCK: true,
+  USE_MOCK: false,
 
   // When USE_MOCK is true and MOCK_EMPTY is true, lists return [] and stats return 0
   MOCK_EMPTY: false,

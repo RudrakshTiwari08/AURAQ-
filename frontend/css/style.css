@@ -12,6 +12,8 @@
   --deep-red: #7A0F1F;
   --crimson: #C1121F;
   --ember: #FF4D3D;
+  --page-red-top: #7d1226;
+  --page-red-bottom: #5a0c1b;
   --bone: #F4EAE6;
   --muted-rose: #B89A9A;
   --champagne: #D9B77E;
@@ -95,28 +97,6 @@ body {
   background: var(--ember);
   box-shadow: 0 0 10px var(--ember), 0 0 4px var(--champagne);
   transition: width 60ms linear;
-}
-
-/* Subtle Animated Grain Overlay */
-.grain-overlay {
-  position: fixed;
-  inset: -50%;
-  width: 200%;
-  height: 200%;
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.045'/%3E%3C/svg%3E");
-  pointer-events: none;
-  z-index: 999;
-  opacity: 0.65;
-  animation: grain-shift 8s steps(10) infinite;
-}
-
-@keyframes grain-shift {
-  0%, 100% { transform: translate(0, 0); }
-  10% { transform: translate(-2%, -3%); }
-  30% { transform: translate(3%, -1%); }
-  50% { transform: translate(-1%, 4%); }
-  70% { transform: translate(4%, 2%); }
-  90% { transform: translate(-3%, 1%); }
 }
 
 /* Custom Cursor Glow (Desktop Only) */
