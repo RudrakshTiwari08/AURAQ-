@@ -550,7 +550,7 @@
         <a href="index.html" class="dash-logo-badge auraq-wordmark" style="margin-bottom: 2rem;">A U R A Q</a>
         <div class="dash-bot-status" style="margin-top: -1.25rem; margin-bottom: 2rem;">
           <div class="dash-bot-dot"></div>
-          <span>Active Nocturnal Agent</span>
+          <span>Assistant Online</span>
         </div>
 
         <ul class="dash-nav-menu">
@@ -616,7 +616,7 @@
 
       <div class="dash-sidebar-footer">
         <div class="dash-store-label">
-          <span>Active Boutique</span>
+          <span>Your Business</span>
           <strong id="sidebar-store-name"></strong>
         </div>
         <button class="btn btn-ghost btn-sm" id="btn-sidebar-logout" style="justify-content: flex-start; padding-left: 0;">
@@ -668,7 +668,7 @@
         <!-- Funnel Visual -->
         <div class="funnel-container">
           <div style="display: flex; justify-content: space-between; align-items: center;">
-            <span class="stat-label-text" style="margin-bottom: 0;">Impulse-to-Order Conversion Funnel</span>
+            <span class="stat-label-text" style="margin-bottom: 0;">Customer Funnel</span>
             <span style="font-size: 0.8rem; color: var(--champagne);">Direct Instagram Bio Trajectory</span>
           </div>
 
@@ -710,7 +710,7 @@
         <!-- 14-Day Line Chart & Top Asked Products -->
         <div class="overview-split-grid">
           <div class="chart-panel-box">
-            <h3 class="font-display" style="font-size: 1.15rem; margin-bottom: 1.25rem;">14-Day Nocturnal Velocity</h3>
+            <h3 class="font-display" style="font-size: 1.15rem; margin-bottom: 1.25rem;">Conversations, Last 14 Days</h3>
             <div style="height: 280px; position: relative;">
               <canvas id="velocity-chart"></canvas>
             </div>
@@ -803,7 +803,7 @@
         <header class="dash-header-bar">
           <div>
             <h1 class="dash-header-title font-display">Catalog Management</h1>
-            <p class="dash-header-subtitle">Update stock counts, prices, and available size/color combinations.</p>
+            <p class="dash-header-subtitle">Update stock counts, prices and options for each item.</p>
           </div>
           <button class="btn btn-ember btn-sm" id="btn-open-add-product">+ Add Product</button>
         </header>
@@ -820,7 +820,7 @@
             name,price,category,size,colour,stock
           </p>
           <p style="font-size: 0.75rem; color: var(--muted-rose); margin-top: 0.4rem;">
-            One row per variant. Rows with the same name belong to the same product.
+            One row per variant. Rows with the same name belong to the same product. <span data-vcsvnote></span>
           </p>
           <div style="margin-top: 0.85rem; display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap;">
             <label for="dash-csv-file-input" class="btn btn-secondary btn-sm" style="cursor: pointer;">
@@ -844,7 +844,7 @@
         <header class="dash-header-bar">
           <div>
             <h1 class="dash-header-title font-display">Knowledge & FAQs</h1>
-            <p class="dash-header-subtitle">Boutique rules, sizing guidance, and store policies memorized by the agent.</p>
+            <p class="dash-header-subtitle">Delivery, returns, timings and policies your assistant uses to answer customers.</p>
           </div>
           <button class="btn btn-ember btn-sm" id="btn-open-add-faq">+ Add FAQ</button>
         </header>
@@ -868,7 +868,7 @@
         <div class="test-chat-box">
           <div class="test-chat-feed" id="test-chat-feed">
             <div class="chat-bubble assistant">
-              Hello! I am your boutique’s nocturnal Auraq assistant. Ask me about your stock, sizes, delivery, or ask to place an order.
+              Hello! I’m your shop’s assistant. Ask me about your products, prices, stock or delivery, or try placing an order.
               <div class="chat-meta">Auraq Autonomous Agent</div>
             </div>
           </div>
@@ -966,6 +966,7 @@
 
   <script src="js/config.js"></script>
   <script src="js/api.js"></script>
+  <script src="js/labels.js"></script>
   <script src="js/auth.js"></script>
   <script src="js/dashboard.js"></script>
 </body>

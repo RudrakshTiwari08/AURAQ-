@@ -7,13 +7,11 @@
 
 :root {
   /* Core Color Palette */
-  --oxblood: #0B0306;
-  --wine: #2A0610;
-  --deep-red: #7A0F1F;
+  --oxblood: #2B0710;
+  --wine: #4A0B19;
+  --deep-red: #8A1224;
   --crimson: #C1121F;
   --ember: #FF4D3D;
-  --page-red-top: #7d1226;
-  --page-red-bottom: #5a0c1b;
   --bone: #F4EAE6;
   --muted-rose: #B89A9A;
   --champagne: #D9B77E;
@@ -97,6 +95,28 @@ body {
   background: var(--ember);
   box-shadow: 0 0 10px var(--ember), 0 0 4px var(--champagne);
   transition: width 60ms linear;
+}
+
+/* Subtle Animated Grain Overlay */
+.grain-overlay {
+  position: fixed;
+  inset: -50%;
+  width: 200%;
+  height: 200%;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.045'/%3E%3C/svg%3E");
+  pointer-events: none;
+  z-index: 999;
+  opacity: 0.65;
+  animation: grain-shift 8s steps(10) infinite;
+}
+
+@keyframes grain-shift {
+  0%, 100% { transform: translate(0, 0); }
+  10% { transform: translate(-2%, -3%); }
+  30% { transform: translate(3%, -1%); }
+  50% { transform: translate(-1%, 4%); }
+  70% { transform: translate(4%, 2%); }
+  90% { transform: translate(-3%, 1%); }
 }
 
 /* Custom Cursor Glow (Desktop Only) */
@@ -548,4 +568,38 @@ h1, h2, h3, h4, .font-display {
   .grain-overlay {
     animation: none !important;
   }
+}
+
+
+/* ==========================================================================
+   Tweaks: deep red background, no moving grain, mobile polish
+   (change the three colours below to tune the red)
+   ========================================================================== */
+:root {
+  --page-red-top: #7d1226;     /* brighter red glow, top-left */
+  --page-red-bottom: #5a0c1b;  /* glow, bottom-right */
+}
+
+html {
+  background-color: var(--oxblood);
+  background-image:
+    radial-gradient(90% 55% at 12% 0%, var(--page-red-top) 0%, rgba(125, 18, 38, 0) 70%),
+    radial-gradient(80% 55% at 100% 100%, var(--page-red-bottom) 0%, rgba(90, 12, 27, 0) 70%);
+  background-repeat: no-repeat;
+}
+body { background-color: transparent; }
+
+/* The moving grey noise layer is switched off */
+.grain-overlay { display: none !important; animation: none !important; }
+
+@media (max-width: 640px) {
+  html { font-size: 15px; }
+  input, textarea, select { font-size: 16px !important; }      /* stops iPhone zoom-on-focus */
+  img, svg, canvas, video { max-width: 100%; }
+  [style*="grid-template-columns: 1fr 1fr"],
+  [style*="grid-template-columns: 2fr 1fr 1fr"] { grid-template-columns: 1fr !important; }
+  .variant-row { grid-template-columns: 1fr 1fr !important; }
+  .variant-row .btn-remove-row { justify-self: end; }
+  .glass-panel[style*="padding: 2.5rem"] { padding: 1.5rem 1.1rem !important; }
+  .glass-card[style*="padding: 1.75rem"] { padding: 1.1rem !important; }
 }

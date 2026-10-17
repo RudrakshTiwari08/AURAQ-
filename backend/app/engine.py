@@ -14,6 +14,7 @@ from datetime import timedelta
 from sqlalchemy import select
 from sqlalchemy.orm import Session, selectinload
 
+from .labels import labels_for
 from .llm import LLMError, LLMNotConfigured, generate_text
 from .models import FAQ, Business, Conversation, Message, Order, Product, utcnow
 from .notify import notify_owner
@@ -161,7 +162,7 @@ def catalog_text(products: list[Product]) -> str:
         return "(no products listed yet)"
     lines = []
     for p in products:
-        stock = ", ".join(f"{v.size}/{v.colour}: {v.stock} in stock" for v in p.variants) or "no variants"
+        stock = ", ".join(f"{variant_name(v) or 'standard'}: {v.stock} in stock" for v in p.variants) or "no variants"
         lines.append(f"- {p.name} | {inr(p.price)} | {p.category or 'General'} | {stock}")
     return "\n".join(lines)
 
@@ -295,8 +296,13 @@ def find_variant(p: Product, size: str, colour: str):
     return next((v for v in p.variants if v.size.lower() == size.lower() and v.colour.lower() == colour.lower()), None)
 
 
+def variant_name(v) -> str:
+    """'M/Black', 'Regular/Hot', or just 'M' when the second option is blank."""
+    return "/".join(x for x in (v.size, v.colour) if x)
+
+
 def in_stock_list(p: Product) -> str:
-    return ", ".join(f"{v.size}/{v.colour}" for v in p.variants if v.stock > 0)[:200]
+    return ", ".join(variant_name(v) for v in p.variants if v.stock > 0)[:200]
 
 
 def pretty_variant(size: str, colour: str) -> str:
@@ -308,6 +314,8 @@ def advance_order(db, business, conv, products, state: dict, ex: dict, text: str
     """Fold what the customer just said into the draft order, then ask for the next missing piece.
     Returns (reply, understood). understood=False means the message was not about the order."""
     provided = False
+    first = labels_for(business.type)["first"].lower()      # "size" / "option" / "model"
+    second = labels_for(business.type)["second"].lower()    # "colour" / "type" / "style"
     p = next((x for x in products if x.id == state.get("product_id")), None)
 
     # ---- product
@@ -331,23 +339,23 @@ def advance_order(db, business, conv, products, state: dict, ex: dict, text: str
             provided = True
             s = match_option(ex["size"], sizes)
             if s is None:
-                return f"Sorry, {p.name} isn't available in \"{clip(ex['size'], 20)}\". Sizes we have: {', '.join(sizes)}.", True
+                return f"Sorry, {p.name} doesn't come in \"{clip(ex['size'], 20)}\". Available {first}s: {', '.join(x for x in sizes if x)}.", True
             if s != state.get("size"):
                 state["size"], state["colour"] = s, None
             state["awaiting"] = None
-        if not state.get("size") and len(sizes) == 1:
+        if state.get("size") is None and len(sizes) == 1:
             state["size"] = sizes[0]
         # ---- colour
-        if state.get("size"):
+        if state.get("size") is not None:
             colours = distinct([v.colour for v in p.variants if v.size.lower() == state["size"].lower()])
             if ex.get("colour"):
                 provided = True
                 c = match_option(ex["colour"], colours, fuzzy=True)
                 if c is None:
-                    return f"Sorry, {p.name} in size {state['size']} comes in: {', '.join(colours)}.", True
+                    return f"Sorry, {p.name} ({state['size']}) comes in these {second}s: {', '.join(x for x in colours if x)}.", True
                 state["colour"] = c
                 state["awaiting"] = None
-            if not state.get("colour") and len(colours) == 1:
+            if state.get("colour") is None and len(colours) == 1:
                 state["colour"] = colours[0]
 
     # ---- quantity
@@ -389,24 +397,24 @@ def advance_order(db, business, conv, products, state: dict, ex: dict, text: str
         names = ", ".join(x.name for x in products[:8])
         return (f"Sure! Which item would you like to order? We have: {names}." if names
                 else "The shop hasn't listed any products yet, so I can't take an order right now."), True
-    if not state.get("size"):
+    if state.get("size") is None:
         avail = distinct([v.size for v in p.variants if v.stock > 0])
         if not avail:
             state.clear(); state["started"] = True
             return f"Sorry, {p.name} is out of stock right now.", True
-        return f"Which size would you like for {p.name}? Available: {', '.join(avail)}.", True
-    if not state.get("colour"):
+        return f"Which {first} would you like for {p.name}? Available: {', '.join(avail)}.", True
+    if state.get("colour") is None:
         avail = distinct([v.colour for v in p.variants if v.size.lower() == state["size"].lower() and v.stock > 0])
         if not avail:
             left = in_stock_list(p)
             state["size"] = None
-            return (f"Sorry, that size is sold out for {p.name}." + (f" Still available: {left}." if left else "")), True
-        return f"Which colour for size {state['size']}? Available: {', '.join(avail)}.", True
+            return (f"Sorry, that {first} is sold out for {p.name}." + (f" Still available: {left}." if left else "")), True
+        return f"Which {second} for {first} {state['size']}? Available: {', '.join(avail)}.", True
 
     v = find_variant(p, state["size"], state["colour"])
     if v is None:
         state["size"] = state["colour"] = None
-        return "That combination isn't available. Which size would you like?", True
+        return f"That combination isn't available. Which {first} would you like?", True
     if v.stock <= 0:
         left = in_stock_list(p)
         state["size"] = state["colour"] = None

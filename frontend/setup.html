@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Auraq — Storefront Onboarding Console</title>
-  <meta name="description" content="Configure your boutique details, catalog variants, and knowledge base to deploy your autonomous Telegram storefront agent.">
+  <meta name="description" content="Set up your business details, products and FAQs, and launch your AI assistant on Telegram.">
   <link rel="stylesheet" href="css/style.css">
   <style>
     /* Wizard Container & Header */
@@ -338,9 +338,9 @@
 
       <form id="form-step-1" novalidate>
         <div class="form-group">
-          <label class="form-label" for="store-desc">Store Narrative & Aesthetic</label>
-          <textarea id="store-desc" rows="3" class="form-textarea" placeholder="e.g. Independent nocturnal garment house crafting heavyweight staples and raw denim in limited numbered runs."></textarea>
-          <span class="form-help">Your assistant uses this to greet nocturnal buyers and explain your brand philosophy.</span>
+          <label class="form-label" for="store-desc">About Your Business</label>
+          <textarea id="store-desc" rows="3" class="form-textarea" placeholder="e.g. Family-run cafe in Hazratganj serving fresh coffee and snacks since 2015."></textarea>
+          <span class="form-help">Your assistant uses this to greet customers and explain what makes your business special.</span>
         </div>
 
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem;">
@@ -357,7 +357,7 @@
 
         <div class="form-group">
           <label class="form-label" for="owner-contact">Owner Escalation Contact</label>
-          <input type="text" id="owner-contact" class="form-input" placeholder="e.g. @your_boutique or +91 98765 43210">
+          <input type="text" id="owner-contact" class="form-input" placeholder="e.g. @your_username or +91 98765 43210">
           <span class="form-help">Where the assistant routes complex requests when a customer demands human review.</span>
         </div>
 
@@ -380,7 +380,7 @@
     <section class="glass-panel step-card" id="step-2" style="padding: 2.5rem;" aria-labelledby="step-2-title">
       <header class="step-intro">
         <h1 class="font-display" id="step-2-title">Catalog, Sizes & Quantities</h1>
-        <p>The agent never sells sold-out pieces. Register items with specific size and colour stocks.</p>
+        <p>The assistant never sells sold-out items. Add what you sell, with its options (if any) and how many you have in stock.</p>
       </header>
 
       <!-- Existing Products Stream -->
@@ -398,7 +398,7 @@
           <div style="display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 0.75rem; margin-bottom: 1rem;">
             <div class="form-group" style="margin-bottom: 0;">
               <label class="form-label" for="prod-name">Item Name</label>
-              <input type="text" id="prod-name" class="form-input" placeholder="e.g. Overdyed Crimson Hoodie" required>
+              <input type="text" id="prod-name" class="form-input" data-vph="item" placeholder="e.g. Your item" required>
             </div>
             <div class="form-group" style="margin-bottom: 0;">
               <label class="form-label" for="prod-price">Price (₹)</label>
@@ -406,15 +406,15 @@
             </div>
             <div class="form-group" style="margin-bottom: 0;">
               <label class="form-label" for="prod-cat">Category</label>
-              <input type="text" id="prod-cat" class="form-input" placeholder="Hoodies" required>
+              <input type="text" id="prod-cat" class="form-input" data-vph="category" placeholder="e.g. Category" required>
             </div>
           </div>
 
-          <label class="form-label" style="display: block; margin-bottom: 0.5rem;">Variants (Size / Colour / Stock Count)</label>
+          <label class="form-label" style="display: block; margin-bottom: 0.5rem;">Options and stock: <span data-vlabel="first">Option</span> / <span data-vlabel="second">Variant</span> / Stock count <span style="color: var(--muted-rose); font-weight: 400;">(leave the options blank if the item has none)</span></label>
           <div id="variants-container">
             <div class="variant-row">
-              <input type="text" class="form-input variant-size" placeholder="Size (e.g. M)" required>
-              <input type="text" class="form-input variant-colour" placeholder="Colour (e.g. Noir)" required>
+              <input type="text" class="form-input variant-size" placeholder="Option (optional)">
+              <input type="text" class="form-input variant-colour" placeholder="Variant (optional)">
               <input type="number" class="form-input variant-stock" placeholder="Stock (e.g. 10)" required min="0">
               <button type="button" class="btn-remove-row" title="Remove variant" aria-label="Remove variant">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -448,7 +448,7 @@
           name,price,category,size,colour,stock
         </p>
         <p style="font-size: 0.75rem; color: var(--muted-rose); margin-top: 0.4rem;">
-          One row per variant. Rows with the same name belong to the same product.
+          One row per variant. Rows with the same name belong to the same product. <span data-vcsvnote></span>
         </p>
       </div>
 
@@ -489,7 +489,7 @@
       <div class="glass-card" style="padding: 1.75rem; margin-bottom: 2rem;">
         <h3 class="font-display" style="font-size: 1.15rem; margin-bottom: 0.5rem;">Auto-Generate from Studio Text</h3>
         <p style="font-size: 0.85rem; color: var(--muted-rose); margin-bottom: 1rem;">
-          Paste your website copy, return policy, or garment care rules. We’ll synthesize verified Q&amp;A pairs.
+          Paste your website copy, delivery and refund rules, opening hours or any policies. We’ll synthesize verified Q&amp;A pairs.
         </p>
         <textarea id="raw-knowledge-text" rows="3" class="form-textarea" placeholder="Paste return policy, sizing rules, or studio terms here..."></textarea>
         <div style="margin-top: 0.75rem; text-align: right;">
@@ -545,7 +545,7 @@
     <section class="glass-panel step-card" id="step-4" aria-labelledby="step-4-title">
       <div class="completion-panel">
         <span class="text-ember" style="font-size: 0.8125rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.15em; display: block; margin-bottom: 0.5rem;">
-          Nocturnal Engine Online
+          Assistant Online
         </span>
         <h1 class="font-display" id="step-4-title" style="font-size: clamp(2.2rem, 4vw, 3.2rem); margin-bottom: 1rem;">
           Your storefront agent is awake.
@@ -604,6 +604,7 @@
 
   <script src="js/config.js"></script>
   <script src="js/api.js"></script>
+  <script src="js/labels.js"></script>
   <script src="js/setup.js"></script>
 </body>
 </html>

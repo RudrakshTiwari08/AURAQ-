@@ -124,7 +124,7 @@
           data: {
             labels: labels,
             datasets: [{
-              label: 'Nocturnal Conversations',
+              label: 'Conversations',
               data: dataPoints,
               borderColor: '#FF4D3D',
               borderWidth: 2.5,
@@ -545,7 +545,7 @@
               <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/>
             </svg>
             <h4 class="empty-state-title">No products in inventory</h4>
-            <p class="empty-state-text">Add your items to let your nocturnal assistant answer size and stock questions.</p>
+            <p class="empty-state-text">Add your items so your assistant can answer price and stock questions.</p>
           </div>
         `;
         return;
@@ -554,7 +554,7 @@
       container.innerHTML = '';
       products.forEach(p => {
         const variantsSummary = (p.variants || [])
-          .map(v => `${v.size} / ${v.colour} (${v.stock} in stock)`)
+          .map(v => `${[v.size, v.colour].filter(x => x && !['standard','default'].includes(x.toLowerCase())).join(' / ') || 'Standard'} (${v.stock} in stock)`)
           .join(' · ');
 
         const formattedPrice = window.formatCurrency ? window.formatCurrency(p.price) : `${window.CONFIG?.CURRENCY || '₹'}${p.price}`;
@@ -603,13 +603,13 @@
         if (!name) return;
         const priceCurrency = (window.CONFIG && window.CONFIG.CURRENCY) ? window.CONFIG.CURRENCY : '₹';
         const price = parseFloat(prompt(`Price in ${priceCurrency}:`)) || 0;
-        const category = prompt('Category (e.g. Hoodies, Jeans, Tees):') || 'Garments';
+        const category = prompt('Category (e.g. ' + ((window.VARIANT_LABELS && window.VARIANT_LABELS.catEg) || 'Popular items') + '):') || 'General';
         try {
           await window.api.createProduct({
             name,
             price,
             category,
-            variants: [{ size: 'M', colour: 'Black', stock: 10 }]
+            variants: [{ size: 'Standard', colour: 'Default', stock: 10 }]
           });
           showToast('Product added to live stock.');
           loadProducts();
@@ -638,7 +638,7 @@
               <line x1="12" y1="17" x2="12.01" y2="17"/>
             </svg>
             <h4 class="empty-state-title">No FAQs configured</h4>
-            <p class="empty-state-text">Teach the assistant your boutique rules to answer delivery and exchange questions.</p>
+            <p class="empty-state-text">Teach the assistant your delivery, refund and timing rules so it can answer customers.</p>
           </div>
         `;
         return;
@@ -859,7 +859,7 @@
     if (sampleBtn) {
       sampleBtn.addEventListener('click', (e) => {
         e.preventDefault();
-        const sampleText = "name,price,category,size,colour,stock\nHeavyweight Boxy Tee,899,T-Shirts,M,Noir,10\nHeavyweight Boxy Tee,899,T-Shirts,L,Noir,15\nRaw Selvedge Denim,2499,Jeans,32,Indigo,8\nOverdyed Crimson Hoodie,1899,Hoodies,L,Crimson,12\nWaxed Combat Boot,2999,Shoes,42,Black,6\n";
+        const sampleText = (window.VARIANT_LABELS && window.VARIANT_LABELS.sampleCsv) || "name,price,category,size,colour,stock\nGift Box,999,Gifts,Small,,10\n";
         const blob = new Blob([sampleText], { type: 'text/csv;charset=utf-8;' });
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');

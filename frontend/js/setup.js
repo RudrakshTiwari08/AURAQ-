@@ -224,7 +224,7 @@
       container.innerHTML = '';
       products.forEach(p => {
         const variantsSummary = (p.variants || [])
-          .map(v => `${v.size}/${v.colour} (${v.stock} in stock)`)
+          .map(v => `${[v.size, v.colour].filter(x => x && !['standard','default'].includes(x.toLowerCase())).join(' / ') || 'Standard'} (${v.stock} in stock)`)
           .join(' · ');
 
         const formattedPrice = window.formatCurrency ? window.formatCurrency(p.price) : `₹${p.price}`;
@@ -276,7 +276,7 @@
     if (sampleCsvBtn) {
       sampleCsvBtn.addEventListener('click', (e) => {
         e.preventDefault();
-        const sampleText = "name,price,category,size,colour,stock\nHeavyweight Boxy Tee,899,T-Shirts,M,Noir,10\nHeavyweight Boxy Tee,899,T-Shirts,L,Noir,15\nRaw Selvedge Denim,2499,Jeans,32,Indigo,8\nOverdyed Crimson Hoodie,1899,Hoodies,L,Crimson,12\nWaxed Combat Boot,2999,Shoes,42,Black,6\n";
+        const sampleText = (window.VARIANT_LABELS && window.VARIANT_LABELS.sampleCsv) || "name,price,category,size,colour,stock\nGift Box,999,Gifts,Small,,10\n";
         const blob = new Blob([sampleText], { type: 'text/csv;charset=utf-8;' });
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
@@ -295,8 +295,8 @@
         const row = document.createElement('div');
         row.className = 'variant-row';
         row.innerHTML = `
-          <input type="text" class="form-input variant-size" placeholder="Size (e.g. L)" required>
-          <input type="text" class="form-input variant-colour" placeholder="Colour (e.g. Crimson)" required>
+          <input type="text" class="form-input variant-size" placeholder="${(window.VARIANT_LABELS || {}).sizePh || 'Option (optional)'}">
+          <input type="text" class="form-input variant-colour" placeholder="${(window.VARIANT_LABELS || {}).colourPh || 'Variant (optional)'}">
           <input type="number" class="form-input variant-stock" placeholder="Stock (e.g. 15)" required min="0">
           <button type="button" class="btn-remove-row" title="Remove variant">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -330,11 +330,17 @@
         rows.forEach(r => {
           const size = r.querySelector('.variant-size').value.trim();
           const colour = r.querySelector('.variant-colour').value.trim();
-          const stock = parseInt(r.querySelector('.variant-stock').value, 10) || 0;
-          if (size && colour) {
-            variants.push({ size, colour, stock });
+          const stockRaw = r.querySelector('.variant-stock').value.trim();
+          const stock = parseInt(stockRaw, 10) || 0;
+          // Both options are optional (a coffee has no colour). A row counts if anything is filled in.
+          if (size || colour || stockRaw !== '') {
+            variants.push({ size: size || 'Standard', colour: colour || 'Default', stock });
           }
         });
+        if (variants.length === 0) {
+          showAlert('Add a stock count for this item');
+          return;
+        }
 
         if (!name) {
           showAlert('Product name is required');

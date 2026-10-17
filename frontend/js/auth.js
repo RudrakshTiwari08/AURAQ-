@@ -128,7 +128,7 @@
       // Enter loading state
       const originalText = submitBtn.innerHTML;
       submitBtn.disabled = true;
-      submitBtn.innerHTML = '<span class="spinner"></span> Creating boutique agent...';
+      submitBtn.innerHTML = '<span class="spinner"></span> Creating your assistant...';
 
       try {
         await window.api.signup({
