@@ -56,3 +56,8 @@ def verify_owner_code(code: str) -> int | None:
     if hmac.compare_digest(owner_connect_code(business_id), code):
         return business_id
     return None
+
+
+def telegram_webhook_secret() -> str:
+    """Telegram sends this back in a header on every webhook call; anyone else cannot guess it."""
+    return hmac.new(SECRET_KEY.encode(), b"telegram-webhook", hashlib.sha256).hexdigest()[:48]

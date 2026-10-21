@@ -8,7 +8,8 @@ from .database import Base
 
 
 def utcnow() -> datetime:
-    return datetime.now(timezone.utc)
+    """Current UTC time WITHOUT a timezone tag, so SQLite and Postgres store the same thing."""
+    return datetime.now(timezone.utc).replace(tzinfo=None)
 
 
 def new_link_code() -> str:

@@ -9,9 +9,9 @@ import json
 import re
 import time
 from collections import defaultdict, deque
-from datetime import timedelta
+from datetime import datetime, time as dtime, timedelta, timezone
 
-from sqlalchemy import select
+from sqlalchemy import func, select
 from sqlalchemy.orm import Session, selectinload
 
 from .labels import labels_for
@@ -19,7 +19,8 @@ from .llm import LLMError, LLMNotConfigured, generate_text
 from .models import FAQ, Business, Conversation, Message, Order, Product, utcnow
 from .notify import notify_owner
 from .safe import clean_name, valid_contact
-from .timeutil import aware
+from .config import DAILY_MESSAGE_LIMIT
+from .timeutil import LOCAL_TZ, aware, local
 
 MAX_TEXT = 1000
 HISTORY = 8
@@ -92,6 +93,19 @@ def too_fast(conv_id: int) -> bool:
     return False
 
 
+# ------------------------------------------------------------- daily cap
+def over_daily_limit(db: Session, business: Business) -> bool:
+    """Protects the free AI quota: one shop can only use so many customer messages per day (India time)."""
+    start_of_day = datetime.combine(local(utcnow()).date(), dtime.min, tzinfo=LOCAL_TZ)
+    since = start_of_day.astimezone(timezone.utc).replace(tzinfo=None)
+    used = db.scalar(
+        select(func.count(Message.id))
+        .join(Conversation, Conversation.id == Message.conversation_id)
+        .where(Conversation.business_id == business.id, Message.role == "customer", Message.created_at >= since)
+    ) or 0
+    return used >= DAILY_MESSAGE_LIMIT
+
+
 # ------------------------------------------------------------- conversations
 def get_or_create_conversation(db: Session, business: Business, channel: str, external_id: str,
                                name: str = "", username: str = "") -> Conversation:
@@ -125,7 +139,7 @@ def load_state(conv: Conversation) -> dict:
         state = json.loads(conv.state)
     except ValueError:
         return {}
-    if not isinstance(state, dict) or utcnow() - aware(conv.last_message_at) > DRAFT_EXPIRY:
+    if not isinstance(state, dict) or aware(utcnow()) - aware(conv.last_message_at) > DRAFT_EXPIRY:
         return {}
     return state
 
@@ -482,6 +496,9 @@ def handle_message(db: Session, business: Business, conv: Conversation, text: st
         return "Please send me a text message."
     if too_fast(conv.id):
         return "You're sending messages very quickly. Please wait a moment and try again."
+    if over_daily_limit(db, business):
+        return ("This shop's assistant has reached its limit for today. "
+                "Please try again tomorrow, or contact the shop directly.")
 
     previous = db.scalars(
         select(Message).where(Message.conversation_id == conv.id).order_by(Message.id.desc()).limit(HISTORY)

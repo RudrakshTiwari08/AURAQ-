@@ -248,19 +248,23 @@
         `;
       }
 
+      // show size/type only when the item really has options (hides blank, 'Standard' and 'Default')
+      const variantText = [o.size, o.colour]
+        .filter(x => x && !['standard', 'default'].includes(String(x).toLowerCase())).join(' · ');
+
       rowsHtml += `
         <tr>
-          <td>
+          <td data-label="Customer">
             <strong>${o.customer_name}</strong>
             <div style="font-size: 0.775rem; color: var(--champagne);">${o.contact}</div>
           </td>
-          <td>
+          <td data-label="Item">
             <strong>${o.product}</strong>
-            <div style="font-size: 0.775rem; color: var(--muted-rose);">${o.size} · ${o.colour} (Qty: ${o.quantity})</div>
+            <div style="font-size: 0.775rem; color: var(--muted-rose);">${variantText ? variantText + ' · ' : ''}Qty ${o.quantity}</div>
           </td>
-          <td><span class="status-chip ${statusClass}">${statusLabel}</span></td>
-          <td style="color: var(--muted-rose); font-size: 0.8125rem;">${o.created_at}</td>
-          <td>${actionsHtml}</td>
+          <td data-label="Status"><span class="status-chip ${statusClass}">${statusLabel}</span></td>
+          <td data-label="Received" style="color: var(--muted-rose); font-size: 0.8125rem;">${o.created_at}</td>
+          <td data-label="Decision">${actionsHtml}</td>
         </tr>
       `;
     });

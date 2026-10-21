@@ -1,0 +1,67 @@
+/* Dashboard phone fixes. Loaded AFTER the page's own <style>, so these rules win. */
+
+/* 1) The root cause of the sideways scroll: a grid column of "1fr" can never be narrower than its
+      widest content (the orders table). minmax(0, 1fr) lets it shrink to the screen. */
+.dash-layout { grid-template-columns: 260px minmax(0, 1fr); }
+.dash-main { min-width: 0; }
+
+@media (max-width: 860px) {
+  .dash-layout {
+    grid-template-columns: minmax(0, 1fr);
+    padding-bottom: calc(70px + env(safe-area-inset-bottom, 0px));
+  }
+  /* bottom menu: keep it clear of the iPhone home bar */
+  .dash-sidebar {
+    height: calc(64px + env(safe-area-inset-bottom, 0px));
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+  .dash-nav-btn { min-width: 44px; min-height: 44px; }      /* comfortable tap size */
+  .dash-main { padding: 1.5rem 1rem 4rem; }
+  .dash-header-bar { flex-wrap: wrap; gap: 0.75rem; margin-bottom: 1.5rem; }
+  .dash-header-title { font-size: 1.5rem; }
+}
+
+@media (max-width: 640px) {
+  .stat-cards-row { grid-template-columns: 1fr 1fr; gap: 0.75rem; }
+  .chart-panel-box, .top-prods-panel { padding: 1.1rem; }
+
+  /* 2) Orders: a 5-column table cannot fit a phone, so each order becomes a card */
+  .orders-table-wrapper { background: transparent; border: 0; overflow: visible; }
+  .data-table, .data-table tbody, .data-table tr, .data-table td { display: block; width: 100%; }
+  .data-table thead { display: none; }
+  .data-table tr {
+    background: rgba(24, 4, 10, 0.65);
+    border: 1px solid var(--glass-border);
+    border-radius: 14px;
+    padding: 0.9rem 1rem;
+    margin-bottom: 0.9rem;
+  }
+  .data-table td {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.45rem 0;
+    border: 0;
+    text-align: right;
+  }
+  .data-table td::before {
+    content: attr(data-label);
+    flex-shrink: 0;
+    color: var(--muted-rose);
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    text-align: left;
+  }
+  .data-table tr:hover td { background: transparent; }
+  /* the Confirm / Reject row: full width, big buttons */
+  .data-table td:last-child {
+    margin-top: 0.4rem;
+    padding-top: 0.8rem;
+    border-top: 1px solid rgba(244, 234, 230, 0.08);
+  }
+  .data-table td:last-child > div { width: 100%; }
+  .data-table td:last-child .btn { flex: 1; justify-content: center; min-height: 44px; }
+}

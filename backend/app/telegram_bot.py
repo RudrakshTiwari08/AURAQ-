@@ -8,13 +8,13 @@ import time
 import httpx
 from sqlalchemy import select
 
-from .config import TELEGRAM_BOT_TOKEN
+from .config import PUBLIC_URL, TELEGRAM_BOT_TOKEN
 from .database import Base, SessionLocal, engine
 from .engine import get_or_create_conversation, handle_message
 from .models import Business, ChatBinding
 from .notify import send_telegram
 from .safe import clean_name, clean_username
-from .security import verify_owner_code
+from .security import telegram_webhook_secret, verify_owner_code
 
 NOT_BOUND = "Please open a shop's chat link first, so I know which shop you're talking to."
 
@@ -64,8 +64,9 @@ def process_update(update: dict, send=send_telegram) -> None:
                 else:
                     binding.business_id = business.id
                 db.commit()
-                send(chat_id, f"Welcome to {business.name}! Ask me about products, prices, stock or timings, "
-                              "or tell me what you'd like to order.")
+                send(chat_id, f"Welcome to {business.name}! I'm an AI assistant: ask me about products, prices, "
+                              "stock or timings, or tell me what you'd like to order. "
+                              "Your messages are saved so the shop can read them.")
                 return
             binding = db.get(ChatBinding, chat_id)
             send(chat_id, "Hi again! What can I help you with?" if binding else NOT_BOUND)
@@ -95,6 +96,18 @@ def telegram_call(method: str, **payload):
     r = httpx.post(f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/{method}", json=payload, timeout=40)
     r.raise_for_status()
     return r.json()
+
+
+def register_webhook() -> None:
+    """On the deployed site: tell Telegram to deliver messages to us (instead of us polling)."""
+    if not (PUBLIC_URL.startswith("https://") and TELEGRAM_BOT_TOKEN):
+        return
+    try:
+        telegram_call("setWebhook", url=f"{PUBLIC_URL}/api/telegram/webhook",
+                      secret_token=telegram_webhook_secret(), allowed_updates=["message"])
+        print("Telegram webhook registered.")
+    except Exception as exc:        # never crash the site because Telegram was unreachable
+        print("Could not register the Telegram webhook:", type(exc).__name__)
 
 
 def main() -> None:

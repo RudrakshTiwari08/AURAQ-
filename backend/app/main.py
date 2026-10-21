@@ -1,14 +1,25 @@
+from contextlib import asynccontextmanager
+
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 
 from .config import FRONTEND_DIR
 from .database import Base, engine
 from .routers import auth, business, chat, faqs, orders, products, stats, telegram
+from .telegram_bot import register_webhook
 
 # Create any missing tables when the server starts
 Base.metadata.create_all(bind=engine)
 
-app = FastAPI(title="AURAQ API")
+
+
+@asynccontextmanager
+async def lifespan(_app: FastAPI):
+    register_webhook()      # only does something on the deployed site (PUBLIC_URL set)
+    yield
+
+
+app = FastAPI(title="AURAQ API", lifespan=lifespan)
 
 # API routes first...
 app.include_router(auth.router)
