@@ -599,6 +599,12 @@
           openTgBtn.href = link;
           openTgBtn.style.display = 'inline-flex';
         }
+        const appBtn = document.getElementById('btn-open-telegram-app');
+        const appLink = window.telegramAppLink ? window.telegramAppLink(link) : '';
+        if (appBtn && appLink) {
+          appBtn.href = appLink;
+          appBtn.style.display = 'inline-flex';
+        }
         if (prepBox) prepBox.style.display = 'none';
         if (qrWrapper) qrWrapper.style.display = 'inline-flex';
         if (canvas) {
@@ -609,6 +615,8 @@
         // If telegram_link is empty or missing: show "Your link is being prepared" with retry button
         if (shareInput) shareInput.value = '';
         if (openTgBtn) openTgBtn.style.display = 'none';
+        const appBtnHide = document.getElementById('btn-open-telegram-app');
+        if (appBtnHide) appBtnHide.style.display = 'none';
         if (qrWrapper) qrWrapper.style.display = 'none';
         if (prepBox) prepBox.style.display = 'flex';
       }
@@ -647,7 +655,7 @@
         try {
           const alertLink = await window.api.getTelegramConnectLink();
           if (alertLink && alertLink.link) {
-            window.open(alertLink.link, '_blank');
+            window.showTelegramChoices(connectAlertsBtn, alertLink.link);
           }
         } catch (err) {
           showAlert('Failed to retrieve alert link: ' + err.message);

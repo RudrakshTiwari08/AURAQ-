@@ -772,12 +772,20 @@
           openTgBtn.href = biz.telegram_link;
           openTgBtn.style.display = 'inline-flex';
         }
+        const appBtn = document.getElementById('btn-open-settings-telegram-app');
+        const appLink = window.telegramAppLink ? window.telegramAppLink(biz.telegram_link) : '';
+        if (appBtn && appLink) {
+          appBtn.href = appLink;
+          appBtn.style.display = 'inline-flex';
+        }
       } else {
         if (linkInput) {
           linkInput.value = '';
           linkInput.placeholder = 'Your link is being prepared...';
         }
         if (openTgBtn) openTgBtn.style.display = 'none';
+        const appBtnHide = document.getElementById('btn-open-settings-telegram-app');
+        if (appBtnHide) appBtnHide.style.display = 'none';
       }
 
       const sidebarStore = document.getElementById('sidebar-store-name');
@@ -837,7 +845,7 @@
         try {
           const alertLink = await window.api.getTelegramConnectLink();
           if (alertLink && alertLink.link) {
-            window.open(alertLink.link, '_blank');
+            window.showTelegramChoices(connectAlertsBtn, alertLink.link);
           }
         } catch (err) {
           showToast('Failed to retrieve alert link: ' + err.message, true);

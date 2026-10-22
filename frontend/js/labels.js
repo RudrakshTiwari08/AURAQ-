@@ -53,6 +53,46 @@
   }
   window.applyVariantLabels = apply;
 
+  // https://t.me/<bot>?start=<code>   ->   tg://resolve?domain=<bot>&start=<code>
+  // The tg:// form opens the installed Telegram app directly, so it still works on networks that block t.me.
+  window.telegramAppLink = function (url) {
+    try {
+      var u = new URL(url);
+      if (u.hostname !== 't.me') return '';
+      var bot = u.pathname.replace(/^\//, '');
+      var start = u.searchParams.get('start');
+      if (!bot) return '';
+      return 'tg://resolve?domain=' + encodeURIComponent(bot) + (start ? '&start=' + encodeURIComponent(start) : '');
+    } catch (e) { return ''; }
+  };
+
+  // Shows two ways to open a Telegram link under a button: the app, or the browser.
+  window.showTelegramChoices = function (anchor, httpsLink) {
+    if (!anchor || !httpsLink) return;
+    var old = anchor.parentNode.querySelector('.tg-choices');
+    if (old) old.remove();
+    var appLink = window.telegramAppLink(httpsLink);
+    var box = document.createElement('div');
+    box.className = 'tg-choices';
+    box.style.cssText = 'flex-basis:100%; width:100%; text-align:center; margin-top:0.5rem;';
+    var hint = document.createElement('p');
+    hint.style.cssText = 'font-size:0.8125rem; margin:0 0 0.5rem; color:var(--muted-rose);';
+    hint.textContent = 'Choose how to open Telegram. If the browser says the site can\u2019t be reached, use the app, or open the link on your phone.';
+    var row = document.createElement('div');
+    row.style.cssText = 'display:flex; gap:0.5rem; justify-content:center; flex-wrap:wrap;';
+    if (appLink) {
+      var a = document.createElement('a');
+      a.className = 'btn btn-secondary'; a.href = appLink; a.textContent = 'Open in Telegram app';
+      row.appendChild(a);
+    }
+    var b = document.createElement('a');
+    b.className = 'btn btn-secondary'; b.href = httpsLink; b.target = '_blank'; b.rel = 'noopener';
+    b.textContent = 'Open in browser';
+    row.appendChild(b);
+    box.appendChild(hint); box.appendChild(row);
+    anchor.insertAdjacentElement('afterend', box);
+  };
+
   function load() {
     if (!window.api || typeof window.api.getBusiness !== 'function') return;
     window.api.getBusiness().then(function (biz) {
